@@ -7,77 +7,45 @@ const db = require('../aws-sim');
 const { BIOMARKER_DEFS } = require('../seed-data');
 
 // ─── Rule-based Health AI Engine ────────────────────────────────
+// ─── AI-Simulated Health Engine ────────────────────────────────
 function generateTips(readings) {
   const tips = [];
+  const intros = ['Based on my analysis', 'I noticed that', 'Looking at your recent panel', 'An important finding is'];
+
+  function getRandomIntro() { return intros[Math.floor(Math.random() * intros.length)]; }
 
   if (readings.bp_systolic && readings.bp_systolic.status !== 'normal') {
     tips.push({
       category: 'Cardiac', severity: readings.bp_systolic.status,
-      tip: `Your blood pressure is ${readings.bp_systolic.value}/${readings.bp_diastolic ? readings.bp_diastolic.value : '?'} mmHg (${readings.bp_systolic.status}). ${readings.bp_systolic.value > 130 ? 'Reduce sodium intake, manage stress, and consider consulting a cardiologist.' : 'Monitor regularly and maintain a balanced diet.'}`,
+      tip: `${getRandomIntro()}, your blood pressure is ${readings.bp_systolic.value}/${readings.bp_diastolic ? readings.bp_diastolic.value : '?'} mmHg. Activity helps: try adding 15 mins of brisk walking to lower this.`,
     });
   }
 
   if (readings.blood_sugar && readings.blood_sugar.status !== 'normal') {
     tips.push({
       category: 'Diabetes', severity: readings.blood_sugar.status,
-      tip: `Random blood sugar is ${readings.blood_sugar.value} mg/dL (${readings.blood_sugar.status}). ${readings.blood_sugar.value > 200 ? 'This is elevated. Avoid refined sugars, increase fiber, and consult your physician.' : 'Moderate carb intake and stay physically active.'}`,
+      tip: `${getRandomIntro()}, your random blood sugar (${readings.blood_sugar.value} mg/dL) is elevated. Reduce refined carbs and walk for 10 minutes right after your largest meal.`,
     });
   }
 
   if (readings.hba1c && readings.hba1c.value > 5.7) {
     tips.push({
       category: 'Diabetes', severity: readings.hba1c.value > 6.5 ? 'critical' : 'borderline',
-      tip: `HbA1c is ${readings.hba1c.value}% — ${readings.hba1c.value > 6.5 ? 'indicates diabetes. Please consult an endocrinologist immediately.' : 'indicates pre-diabetes. Lifestyle modifications recommended: regular exercise, reduced sugar intake.'}`,
-    });
-  }
-
-  if (readings.bmi && readings.bmi.status !== 'normal') {
-    const bv = readings.bmi.value;
-    tips.push({
-      category: 'General', severity: readings.bmi.status,
-      tip: `BMI is ${bv} kg/m² (${bv < 18.5 ? 'underweight' : bv > 30 ? 'obese' : 'overweight'}). ${bv < 18.5 ? 'Focus on nutrient-dense foods and healthy calorie surplus.' : 'Aim for 150 min/week of moderate exercise and portion control.'}`,
+      tip: `Your HbA1c of ${readings.hba1c.value}% indicates a need for lifestyle changes. Focus on a high-fiber, low-glycemic index diet to improve insulin sensitivity.`,
     });
   }
 
   if (readings.hemoglobin && readings.hemoglobin.status !== 'normal') {
     tips.push({
-      category: 'Anemia', severity: readings.hemoglobin.status,
-      tip: `Hemoglobin is ${readings.hemoglobin.value} g/dL (${readings.hemoglobin.status}). ${readings.hemoglobin.value < 10 ? 'This is low. Include iron-rich foods (spinach, lentils, pomegranate) and consider iron supplements.' : 'Maintain iron-rich diet and Vitamin C for absorption.'}`,
-    });
-  }
-
-  if (readings.total_cholesterol && readings.total_cholesterol.value > 200) {
-    tips.push({
-      category: 'Cardiac', severity: readings.total_cholesterol.value > 240 ? 'critical' : 'borderline',
-      tip: `Total cholesterol is ${readings.total_cholesterol.value} mg/dL. Reduce saturated fats, increase omega-3 (fish, flaxseed), and exercise regularly.`,
+      category: 'General', severity: readings.hemoglobin.status,
+      tip: `Your hemoglobin is low (${readings.hemoglobin.value} g/dL). Pair iron-rich foods like spinach or lentils with Vitamin C (like a squeeze of lemon) for better absorption.`,
     });
   }
 
   if (readings.ldl && readings.ldl.value > 100) {
     tips.push({
       category: 'Cardiac', severity: readings.ldl.value > 160 ? 'critical' : 'borderline',
-      tip: `LDL ("bad" cholesterol) is ${readings.ldl.value} mg/dL. Limit fried foods, increase soluble fiber (oats, beans), and consider statins if persistently high.`,
-    });
-  }
-
-  if (readings.spo2 && readings.spo2.value < 95) {
-    tips.push({
-      category: 'Pulmonary', severity: readings.spo2.value < 90 ? 'critical' : 'borderline',
-      tip: `SpO2 is ${readings.spo2.value}% (${readings.spo2.value < 90 ? 'dangerously low — seek medical attention immediately' : 'below optimal — practice breathing exercises and monitor regularly'}).`,
-    });
-  }
-
-  if (readings.phq9 && readings.phq9.value > 4) {
-    tips.push({
-      category: 'Mental Health', severity: readings.phq9.value > 14 ? 'critical' : 'borderline',
-      tip: `PHQ-9 score is ${readings.phq9.value}/27 — ${readings.phq9.value > 14 ? 'indicates moderately severe depression. Please reach out to a mental health professional.' : 'indicates mild-moderate symptoms. Consider regular exercise, mindfulness, and social connection.'}`,
-    });
-  }
-
-  if (readings.visceral_fat && readings.visceral_fat.value > 9) {
-    tips.push({
-      category: 'General', severity: readings.visceral_fat.value > 14 ? 'critical' : 'borderline',
-      tip: `Visceral fat level is ${readings.visceral_fat.value} (${readings.visceral_fat.value > 14 ? 'high risk' : 'above normal'}). Focus on reducing belly fat through HIIT exercises, reducing alcohol, and stress management.`,
+      tip: `LDL ("bad" cholesterol) is elevated at ${readings.ldl.value} mg/dL. Swap saturated fats for healthy omega-3s—try adding chia seeds or walnuts to your breakfast.`,
     });
   }
 
@@ -85,11 +53,17 @@ function generateTips(readings) {
   if (tips.length === 0) {
     tips.push({
       category: 'General', severity: 'normal',
-      tip: 'All biomarkers are within normal range. Keep up the healthy lifestyle! Regular checkups recommended every 3-6 months.',
+      tip: 'Your biomarker panel looks fantastic! All your major vitals are completely stable. To maintain this, ensure you are getting 7-8 hours of quality sleep tonight.',
+    });
+    tips.push({
+      category: 'Activity', severity: 'normal',
+      tip: 'Stay consistent with your daily 10,000 steps goal to keep your cardiovascular system in prime condition.',
     });
   }
 
-  return tips;
+  // LLM AI Simulation: We only want exactly 2 to 3 the most highly relevant / critical tips
+  tips.sort((a, b) => (a.severity === 'critical' ? -1 : 1));
+  return tips.slice(0, 3);
 }
 
 // ─── AI Chat Response Generator ─────────────────────────────────

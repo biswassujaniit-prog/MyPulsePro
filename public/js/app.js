@@ -107,7 +107,7 @@ async function loadDashboard() {
       const markers = cat.biomarkers.map(b =>
         `<div class="cat-marker-dot ${b.status}"></div>`
       ).join('');
-      return `<div class="category-card" style="--cat-color:${cat.color}" onclick="showCategory('${cat.id}')">
+      return `<div class="category-card" style="--cat-color:${cat.color}" data-catid="${cat.id}">
         <div class="cat-header">
           <span class="cat-name">${cat.name}</span>
           <span class="cat-count">${cat.biomarkers.length} tests</span>
@@ -116,6 +116,10 @@ async function loadDashboard() {
         <div class="cat-markers">${markers}</div>
       </div>`;
     }).join('');
+
+    document.querySelectorAll('.category-card').forEach(card => {
+      card.onclick = () => window.showCategory(card.dataset.catid);
+    });
   }
 
   // Tips

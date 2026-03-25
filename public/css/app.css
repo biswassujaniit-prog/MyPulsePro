@@ -92,7 +92,9 @@ body {
 .brand-text {
   font-weight: 700; font-size: 1.15rem;
   background: linear-gradient(135deg, var(--green), var(--cyan));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 .sidebar-nav {
   flex: 1; padding: 12px 8px;
@@ -415,6 +417,43 @@ body {
   display: flex; align-items: center; justify-content: center;
 }
 .chat-send-btn svg { width: 16px; height: 16px; }
+
+/* ─── Activity Page ─── */
+.devices-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px; }
+.device-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;
+  transition: all 0.2s;
+}
+.device-card:hover { border-color: var(--border-light); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.device-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--bg-input); font-size: 1.5rem; }
+.device-name { font-weight: 600; font-size: 0.95rem; }
+.device-status { font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 12px; }
+.device-status.connected { background: var(--green-bg); color: var(--green); }
+.device-status.disconnected { background: var(--bg-input); color: var(--text-muted); }
+.btn-connect {
+  background: transparent; border: 1px solid var(--border-light); color: var(--text-primary);
+  padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
+  margin-top: auto;
+}
+.btn-connect:hover { background: var(--blue-bg); color: var(--blue); border-color: rgba(59,130,246,0.3); }
+
+.activity-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+.activity-kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.kpi-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; position: relative; overflow: hidden;
+}
+.kpi-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: var(--kpi-color, var(--blue));
+}
+.kpi-title { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 8px; }
+.kpi-val { font-size: 2rem; font-weight: 800; color: var(--text-primary); }
+.kpi-unit { font-size: 0.9rem; color: var(--text-secondary); font-weight: 500; }
+
+.activity-form { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
 
 /* ─── Responsive ─── */
 @media (max-width: 768px) {

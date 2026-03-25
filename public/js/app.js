@@ -26,6 +26,7 @@ function navigate(page) {
     biomarkers: ['Biomarkers', '60+ health parameters across 12 categories'],
     progress: ['Progress Tracking', 'Track biomarker trends over time'],
     diet: ['Diet Tracker', 'Log meals and compare with recommended plan'],
+    activity: ['Activity & Wearables', 'Log exercise and connect health devices'],
     ai: ['Health AI Assistant', 'Ask questions about your health reports'],
   };
   document.getElementById('page-title').textContent = titles[page]?.[0] || page;
@@ -35,6 +36,7 @@ function navigate(page) {
   if (page === 'biomarkers') loadBiomarkers();
   if (page === 'progress') loadProgress();
   if (page === 'diet') loadDiet();
+  if (page === 'activity') loadActivity();
 }
 
 // ─── API Helper ─────────────────────────────────────────────────
@@ -82,7 +84,8 @@ async function loadDashboard() {
     document.getElementById('score-stats').innerHTML =
       `<span class="stat-chip normal">${st.normal} Normal</span>` +
       `<span class="stat-chip borderline">${st.borderline} Borderline</span>` +
-      `<span class="stat-chip critical">${st.critical} Critical</span>`;
+      `<span class="stat-chip critical">${st.critical} Critical</span>` +
+      (summary.activityModifier ? `<span class="stat-chip ${summary.activityModifier > 0 ? 'normal' : 'critical'}" style="width:100%; justify-content:center; margin-top:8px;">🏃 ${summary.activityModifier > 0 ? '+' : ''}${summary.activityModifier} Activity Impact</span>` : '');
 
     document.getElementById('last-updated').textContent = 'Last: ' + summary.date;
 
@@ -392,6 +395,99 @@ async function loadDiet() {
     loadDiet();
   };
 }
+
+// ─── Activity Page ──────────────────────────────────────────────
+async function loadActivity() {
+  const data = await api('/api/activity/summary');
+  if (!data.success) return;
+
+  // Render Connected Devices
+  const ALL_PROVIDERS = [
+    { name: 'Apple Health', icon: '🍏' },
+    { name: 'Google Fit', icon: '🏃' },
+    { name: 'Garmin Connect', icon: '⌚' },
+    { name: 'Fitbit', icon: '📊' }
+  ];
+
+  document.getElementById('devices-grid').innerHTML = ALL_PROVIDERS.map(p => {
+    const dev = data.devices.find(d => d.provider === p.name);
+    const isConn = !!dev;
+    return `
+      <div class="device-card">
+        <div class="device-icon">${p.icon}</div>
+        <div class="device-name">${p.name}</div>
+        <div class="device-status ${isConn ? 'connected' : 'disconnected'}">
+          ${isConn ? 'Connected ✓' : 'Not Connected'}
+        </div>
+        ${isConn 
+          ? `<div style="font-size:0.7rem; color:var(--text-muted); margin-top:auto">Last synced: Today</div>`
+          : `<button class="btn-connect" data-provider="${p.name}">Connect Device</button>` 
+        }
+      </div>
+    `;
+  }).join('');
+
+  document.querySelectorAll('.btn-connect').forEach(btn => {
+    btn.onclick = () => window.connectDevice(btn.dataset.provider);
+  });
+
+  // Render KPIs
+  const kpis = data.kpis;
+  document.getElementById('activity-kpis').innerHTML = `
+    <div class="kpi-card" style="--kpi-color: var(--blue)">
+      <div class="kpi-title">Steps</div>
+      <div class="kpi-val">${kpis.steps.toLocaleString()}</div>
+      <div class="kpi-unit">Target: 10,000</div>
+    </div>
+    <div class="kpi-card" style="--kpi-color: var(--amber)">
+      <div class="kpi-title">Active Minutes</div>
+      <div class="kpi-val">${kpis.activeMinutes}</div>
+      <div class="kpi-unit">Target: 30 mins</div>
+    </div>
+    <div class="kpi-card" style="--kpi-color: var(--red)">
+      <div class="kpi-title">Calories Burned</div>
+      <div class="kpi-val">${kpis.calories.toLocaleString()}</div>
+      <div class="kpi-unit">kcal</div>
+    </div>
+    <div class="kpi-card" style="--kpi-color: var(--purple)">
+      <div class="kpi-title">Resting HR</div>
+      <div class="kpi-val">${kpis.restingHR}</div>
+      <div class="kpi-unit">bpm</div>
+    </div>
+  `;
+
+  // Handle Form
+  const form = document.getElementById('activity-form');
+  form.onsubmit = async function(e) {
+    e.preventDefault();
+    const type = document.getElementById('exercise-type').value;
+    const duration = document.getElementById('exercise-duration').value;
+    const intensity = document.getElementById('exercise-intensity').value;
+    
+    if (!type || !duration || !intensity) return;
+
+    const res = await api('/api/activity/log', {
+      method: 'POST',
+      body: JSON.stringify({ type, duration, intensity })
+    });
+
+    if (res.success) {
+      document.getElementById('activity-success').textContent = 'Activity Saved!';
+      document.getElementById('activity-success').classList.add('show');
+      setTimeout(() => { document.getElementById('activity-success').classList.remove('show'); }, 3000);
+      form.reset();
+      loadActivity();
+    }
+  };
+}
+
+window.connectDevice = async function(provider) {
+  const res = await api('/api/activity/connect', {
+    method: 'POST',
+    body: JSON.stringify({ provider })
+  });
+  if (res.success) loadActivity();
+};
 
 // ─── AI Chat ────────────────────────────────────────────────────
 function initChat() {

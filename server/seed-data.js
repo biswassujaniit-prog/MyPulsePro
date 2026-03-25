@@ -233,8 +233,65 @@ function seedDatabase() {
     ],
   });
 
+  // Generate sample activity logs (last 30 days)
+  const EXERCISE_TYPES = ['Running', 'Walking', 'Cycling', 'Swimming', 'Yoga', 'HIIT', 'Weightlifting'];
+  
+  for (let day = 30; day >= 0; day--) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - day);
+    const dateStr = date.toISOString().split('T')[0];
+
+    // 70% chance to exercise on any given day
+    if (Math.random() < 0.7) {
+      const type = EXERCISE_TYPES[randInt(0, EXERCISE_TYPES.length - 1)];
+      const duration = randInt(20, 90); // 20 to 90 mins
+      const intensity = duration > 45 ? (Math.random() > 0.5 ? 'High' : 'Medium') : 'Low';
+      
+      const intensityMultiplier = intensity === 'High' ? 10 : intensity === 'Medium' ? 7 : 4;
+      const calories = Math.round(duration * intensityMultiplier);
+      const steps = ['Running', 'Walking'].includes(type) 
+                    ? Math.round(duration * (intensity === 'High' ? 160 : 100)) 
+                    : randInt(1000, 3000); // Base incidental steps
+
+      db.putItem('ActivityLogs', {
+        pk: userId,
+        sk: `${dateStr}-sim-${randInt(1000, 9999)}`,
+        date: dateStr,
+        type,
+        duration,
+        intensity,
+        calories,
+        steps,
+        source: 'Simulated'
+      });
+    } else {
+      // Just basic daily movement (sedentary day)
+      db.putItem('ActivityLogs', {
+        pk: userId,
+        sk: `${dateStr}-sim-${randInt(1000, 9999)}`,
+        date: dateStr,
+        type: 'Daily Movement',
+        duration: randInt(5, 15),
+        intensity: 'Low',
+        calories: randInt(50, 150),
+        steps: randInt(800, 2500),
+        source: 'Simulated'
+      });
+    }
+  }
+
+  // Connect a mock wearable device by default
+  db.putItem('WearableDevices', {
+    pk: userId,
+    sk: 'Apple Health',
+    provider: 'Apple Health',
+    connected: true,
+    lastSync: now.toISOString()
+  });
+
   console.log(`  [Seed] Created ${recordCount} daily readings (180 days)`);
   console.log(`  [Seed] Created 31 diet logs + recommended plan`);
+  console.log(`  [Seed] Created 31 activity logs + mock wearable`);
   console.log(`  [Seed] ${Object.keys(BIOMARKER_DEFS).length} biomarker definitions stored`);
   console.log(`  [Seed] ${Object.keys(CATEGORIES).length} categories stored`);
   console.log('  [Seed] Done!');

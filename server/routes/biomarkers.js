@@ -61,6 +61,23 @@ router.get('/summary', (req, res) => {
   }
   const score = Math.round((normal / total) * 100);
 
+  // Calculate Activity Modifier
+  let activityModifier = 0;
+  try {
+    const todayStr = new Date().toISOString().split('T')[0];
+    
+    const actLogs = db.query('ActivityLogs', userId, { skBetween: [todayStr, todayStr] });
+    let todayMins = 0;
+    actLogs.forEach(l => { todayMins += l.duration || 0; });
+    
+    // Immediate daily reward for activity
+    if (todayMins >= 45) activityModifier = 8;
+    else if (todayMins >= 20) activityModifier = 4;
+    else if (todayMins < 10) activityModifier = -5;
+  } catch (e) { console.error('Error calculating activity modifier', e); }
+
+  const finalScore = Math.min(100, Math.max(0, score + activityModifier));
+
   // Key vitals
   const vitals = {
     bp: readings.bp_systolic ? `${readings.bp_systolic.value}/${readings.bp_diastolic ? readings.bp_diastolic.value : '?'}` : 'N/A',
@@ -78,7 +95,7 @@ router.get('/summary', (req, res) => {
   };
 
   res.json({
-    success: true, score, date: latest[0].date,
+    success: true, score: finalScore, baseScore: score, activityModifier, date: latest[0].date,
     stats: { total, normal, borderline, critical },
     vitals,
   });

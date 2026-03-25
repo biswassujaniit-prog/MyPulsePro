@@ -24,6 +24,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/api/biomarkers', require('./routes/biomarkers'));
 app.use('/api/diet', require('./routes/diet'));
 app.use('/api/health-ai', require('./routes/health-ai'));
+app.use('/api/activity', require('./routes/activity'));
 
 // ─── SPA catch-all ──────────────────────────────────────────────
 app.get('*', (req, res) => {

@@ -36,6 +36,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
         <span>Diet Tracker</span>
       </a>
+      <a class="nav-item" data-page="activity" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <span>Activity</span>
+      </a>
       <a class="nav-item" data-page="ai" href="#">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
         <span>Health AI</span>
@@ -149,6 +153,52 @@
           </form>
           <h3 class="sub-title" style="margin-top:24px">Recommended Plan</h3>
           <div id="diet-plan"></div>
+        </div>
+      </div>
+    </section>
+    <!-- ─── Activity Page ─── -->
+    <section class="page" id="page-activity">
+      <!-- Wearable Connect Section -->
+      <h2 class="section-title">Connected Devices</h2>
+      <div class="devices-grid" id="devices-grid">
+        <!-- Rendered via JS -->
+      </div>
+      
+      <div class="activity-layout">
+        <!-- KPIs Section -->
+        <div class="activity-left">
+          <h2 class="section-title">Today's Activity</h2>
+          <div class="activity-kpis" id="activity-kpis">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+        
+        <!-- Manual Log Section -->
+        <div class="activity-right">
+          <h2 class="section-title">Log Exercise</h2>
+          <form id="activity-form" class="activity-form">
+            <select id="exercise-type" class="select-input" required>
+              <option value="" disabled selected>Select Exercise</option>
+              <option value="Running">Running</option>
+              <option value="Walking">Walking</option>
+              <option value="Cycling">Cycling</option>
+              <option value="Swimming">Swimming</option>
+              <option value="Yoga">Yoga</option>
+              <option value="HIIT">HIIT</option>
+              <option value="Weightlifting">Weightlifting</option>
+            </select>
+            <div style="display:flex; gap:16px; margin-top:16px;">
+              <input type="number" id="exercise-duration" class="text-input" placeholder="Duration (mins)" required style="flex:1">
+              <select id="exercise-intensity" class="select-input" required style="flex:1">
+                <option value="Low">Low Intensity</option>
+                <option value="Medium">Medium Intensity</option>
+                <option value="High">High Intensity</option>
+              </select>
+            </div>
+            <div class="auth-error" id="activity-error"></div>
+            <div class="auth-success" id="activity-success"></div>
+            <button type="submit" class="btn-primary" style="margin-top:16px; width:100%">Log Activity</button>
+          </form>
         </div>
       </div>
     </section>

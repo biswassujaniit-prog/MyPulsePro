@@ -25,6 +25,7 @@ app.use('/api/biomarkers', require('./routes/biomarkers'));
 app.use('/api/diet', require('./routes/diet'));
 app.use('/api/health-ai', require('./routes/health-ai'));
 app.use('/api/activity', require('./routes/activity'));
+app.use('/api/auth', require('./routes/auth')); // Gamified Auth
 
 // ─── SPA catch-all ──────────────────────────────────────────────
 app.get('*', (req, res) => {

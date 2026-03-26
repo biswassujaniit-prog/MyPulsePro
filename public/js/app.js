@@ -6,6 +6,12 @@
 (function() {
 'use strict';
 
+// ─── Route Guard ────────────────────────────────────────────────
+if (!localStorage.getItem('auth_token')) {
+  window.location.replace('/login.html');
+  return; // Stop execution
+}
+
 // ─── State ──────────────────────────────────────────────────────
 let currentPage = 'dashboard';
 let progressChart = null;
@@ -73,8 +79,18 @@ function drawScoreRing(score) {
   const levelNames = ['Starter', 'Explorer', 'Achiever', 'Pro', 'Health Ninja'];
   const levelIdx = Math.min(4, Math.floor(score / 20)); // Score 0-100 gives idx 0-4
   const levelEl = document.getElementById('health-level-val');
+  
   if (levelEl) {
-    levelEl.textContent = `Lvl ${levelIdx + 1}: ${levelNames[levelIdx]}`;
+    const prevLevel = levelEl.dataset.currentLevel;
+    const newLevel = `Lvl ${levelIdx + 1}: ${levelNames[levelIdx]}`;
+    
+    // Trigger Level Up Popup if level increased on re-render
+    if (prevLevel && prevLevel !== newLevel) {
+      showGamifiedPopup('Level Up!', '+200 XP', '🚀');
+    }
+    
+    levelEl.textContent = newLevel;
+    levelEl.dataset.currentLevel = newLevel;
     levelEl.style.color = score >= 75 ? 'var(--primary)' : score >= 50 ? 'var(--amber)' : 'var(--red)';
   }
 }
@@ -618,6 +634,7 @@ function initGamification() {
           const card = btnWater.closest('.category-card');
           card.style.borderColor = 'var(--green)';
           card.style.boxShadow = '0 0 20px rgba(16,185,129,0.3)';
+          showGamifiedPopup('Hydration Goal Met!', '+50 XP', '💧');
           setTimeout(() => { card.style.borderColor = 'var(--border)'; card.style.boxShadow = 'none'; }, 2000);
         }
       }
@@ -625,6 +642,29 @@ function initGamification() {
   }
 
   updateWaterUI();
+}
+
+// ─── Global Gamified Toast ──────────────────────────────────────
+window.showGamifiedPopup = function(title, points, emoji) {
+  const existing = document.querySelector('.gamified-popup');
+  if (existing) existing.remove();
+
+  const popup = document.createElement('div');
+  popup.className = 'gamified-popup';
+  popup.innerHTML = `
+    <div class="icon">${emoji}</div>
+    <div class="content">
+      <h4>${title}</h4>
+      <p>${points}</p>
+    </div>
+  `;
+  document.body.appendChild(popup);
+
+  // Automatically remove after 4 seconds
+  setTimeout(() => {
+    popup.style.animation = 'slide-up-fade 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) reverse forwards';
+    setTimeout(() => popup.remove(), 500);
+  }, 4000);
 }
 
 // ─── Init ───────────────────────────────────────────────────────

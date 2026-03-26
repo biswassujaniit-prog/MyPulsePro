@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create MyPulsePro Account</title>
+  <style>
+    :root {
+      --bg: #0B0F19;
+      --surface: rgba(30, 41, 59, 0.6);
+      --border: rgba(255, 255, 255, 0.08);
+      --teal: #00F0FF;
+      --coral: #FF4B4B;
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 20px; }
+    
+    .bg-glow { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(0,240,255,0.15) 0%, rgba(11,15,25,0) 70%); top: -200px; left: -200px; z-index: -1; }
+    .bg-glow-right { position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, rgba(255,75,75,0.1) 0%, rgba(11,15,25,0) 70%); bottom: -100px; right: -100px; z-index: -1; }
+    
+    .auth-card {
+      background: var(--surface); backdrop-filter: blur(16px);
+      border: 1px solid var(--border); border-radius: 24px;
+      padding: 40px; width: 100%; max-width: 420px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      animation: float-up 0.5s ease-out; position: relative;
+    }
+    @keyframes float-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .brand { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 24px; }
+    .brand svg { color: var(--teal); width: 28px; }
+    
+    h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; text-align: center; }
+    p.subtitle { color: var(--text-muted); text-align: center; margin-bottom: 24px; font-size: 0.95rem; }
+    
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; }
+    .form-control { width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); color: var(--text); padding: 12px 16px; border-radius: 12px; font-size: 1rem; transition: 0.2s; }
+    .form-control:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(0,240,255,0.1); }
+    
+    .btn-primary { width: 100%; background: linear-gradient(135deg, #00C6FF, #0072FF); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,114,255,0.2); margin-top: 10px; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,114,255,0.3); }
+    
+    .footer-text { text-align: center; margin-top: 24px; font-size: 0.9rem; color: var(--text-muted); }
+    .footer-text a { color: var(--teal); text-decoration: none; font-weight: 600; }
+    .footer-text a:hover { text-decoration: underline; }
+
+    #error-msg { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #EF4444; padding: 12px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 20px; display: none; text-align: center; }
+
+    /* OTP Screen Styles */
+    .otp-screen { display: none; text-align: center; }
+    .otp-inputs { display: flex; justify-content: center; gap: 12px; margin: 24px 0; }
+    .otp-input { width: 50px; height: 60px; text-align: center; font-size: 1.5rem; font-weight: 700; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 12px; color: white; }
+    .otp-input:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(0,240,255,0.1); }
+    .resend-timer { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px; }
+    .resend-link { color: var(--teal); cursor: pointer; display: none; }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+  <div class="bg-glow-right"></div>
+
+  <div class="auth-card">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      MyPulsePro
+    </div>
+    
+    <div id="register-screen">
+      <h2>Join MyPulsePro</h2>
+      <p class="subtitle">Start tracking 60+ biomarkers today.</p>
+
+      <div id="error-msg"></div>
+
+      <form id="register-form">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="fullname" class="form-control" placeholder="e.g. Rahul Sharma" required>
+        </div>
+        <div class="form-group">
+          <label>Gmail / Email</label>
+          <input type="email" id="email" class="form-control" placeholder="rahul@gmail.com" required>
+        </div>
+        <div class="form-group">
+          <label>Mobile Number (For OTP)</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" class="form-control" value="+91" disabled style="width:60px; padding:12px 8px; text-align:center;">
+            <input type="tel" id="mobile" class="form-control" placeholder="98765 43210" pattern="[0-9]{10}" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Choose Password</label>
+          <input type="password" id="password" class="form-control" placeholder="Min 8 characters" required minlength="8">
+        </div>
+        <button type="submit" class="btn-primary" id="btn-submit">Continue to Verify</button>
+      </form>
+
+      <div class="footer-text">
+        Already have an account? <a href="/login.html">Log In</a>
+      </div>
+    </div>
+
+    <!-- Simulated OTP Screen -->
+    <div id="otp-screen" class="otp-screen">
+      <h2>Verify Mobile</h2>
+      <p class="subtitle">We've sent a 4-digit code to <br><strong style="color:white" id="display-mobile">+91 XXXXX XXXXX</strong></p>
+      
+      <div class="otp-inputs" id="otp-container">
+        <input type="text" class="otp-input" maxlength="1" autofocus>
+        <input type="text" class="otp-input" maxlength="1">
+        <input type="text" class="otp-input" maxlength="1">
+        <input type="text" class="otp-input" maxlength="1">
+      </div>
+
+      <div class="resend-timer" id="timer-box">
+        Resend code in <span id="timer">30</span>s
+      </div>
+      <div class="resend-timer resend-link" id="resend-btn" onclick="startTimer()">
+        Resend OTP Code
+      </div>
+
+      <button class="btn-primary" id="btn-verify">Verify & Create Account</button>
+      
+      <div class="footer-text">
+        <a href="#" onclick="window.location.reload(); return false;">Change mobile number</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─── Gamified Mobile OTP Flow Simulation ───
+    
+    // Auto-focus next OTP input
+    const inputs = document.querySelectorAll('.otp-input');
+    inputs.forEach((input, index) => {
+      input.addEventListener('input', (e) => {
+        if(e.target.value.length === 1 && index < inputs.length - 1) {
+          inputs[index + 1].focus();
+        }
+      });
+      input.addEventListener('keydown', (e) => {
+        if(e.key === 'Backspace' && !e.target.value && index > 0) {
+          inputs[index - 1].focus();
+        }
+      });
+    });
+
+    let registrationData = {};
+
+    document.getElementById('register-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      // Save data for mock auth
+      registrationData = {
+        username: document.getElementById('email').value.split('@')[0], // Generate simple username
+        email: document.getElementById('email').value,
+        mobile: document.getElementById('mobile').value,
+        password: document.getElementById('password').value
+      };
+
+      // Transition to OTP screen
+      document.getElementById('register-screen').style.display = 'none';
+      document.getElementById('otp-screen').style.display = 'block';
+      document.getElementById('display-mobile').textContent = '+91 ******' + registrationData.mobile.slice(-4);
+      
+      startTimer();
+      inputs[0].focus();
+    });
+
+    // Mock Timer
+    let timerInterval;
+    function startTimer() {
+      document.getElementById('timer-box').style.display = 'block';
+      document.getElementById('resend-btn').style.display = 'none';
+      let sec = 30;
+      document.getElementById('timer').textContent = sec;
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        sec--;
+        document.getElementById('timer').textContent = sec;
+        if(sec <= 0) {
+          clearInterval(timerInterval);
+          document.getElementById('timer-box').style.display = 'none';
+          document.getElementById('resend-btn').style.display = 'block';
+        }
+      }, 1000);
+    }
+
+    // Submit Registration via API
+    document.getElementById('btn-verify').addEventListener('click', async () => {
+      const otpCode = Array.from(inputs).map(i => i.value).join('');
+      if(otpCode.length !== 4) return alert('Please enter 4-digit OTP. (Any 4 digits work for simulation)');
+
+      const btn = document.getElementById('btn-verify');
+      btn.textContent = 'Verifying...';
+
+      // Send mock registration
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(registrationData)
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        btn.textContent = 'Account Created! Reducting...';
+        btn.style.background = 'linear-gradient(135deg, #10B981, #06B6D4)';
+        localStorage.setItem('auth_token', data.token);
+        localStorage.setItem('username', data.username);
+        setTimeout(() => window.location.href = '/app.html', 1500);
+      } else {
+        alert(data.message || 'Error creating account');
+        btn.textContent = 'Verify & Create Account';
+      }
+    });
+
+    if (localStorage.getItem('auth_token')) {
+      window.location.href = '/app.html';
+    }
+  </script>
+</body>
+</html>

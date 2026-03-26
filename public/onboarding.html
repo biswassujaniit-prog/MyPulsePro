@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Your Profile | MyPulsePro</title>
+  <style>
+    :root {
+      --bg: #0B0F19;
+      --surface: rgba(30, 41, 59, 0.6);
+      --border: rgba(255, 255, 255, 0.08);
+      --teal: #00F0FF;
+      --coral: #FF4B4B;
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 20px; }
+    
+    .bg-glow { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(0,240,255,0.15) 0%, rgba(11,15,25,0) 70%); top: -200px; left: -200px; z-index: -1; }
+    
+    .onboard-card {
+      background: var(--surface); backdrop-filter: blur(16px);
+      border: 1px solid var(--border); border-radius: 24px;
+      padding: 40px; width: 100%; max-width: 500px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      animation: float-up 0.5s ease-out; position: relative;
+    }
+    @keyframes float-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .progress-track { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-bottom: 32px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--teal); width: 33%; transition: 0.4s ease; box-shadow: 0 0 10px var(--teal); }
+    
+    .step { display: none; animation: fade-in 0.4s; }
+    .step.active { display: block; }
+    @keyframes fade-in { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+
+    h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; }
+    p.subtitle { color: var(--text-muted); margin-bottom: 32px; font-size: 0.95rem; line-height: 1.5; }
+    
+    .form-group { margin-bottom: 24px; }
+    .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-control { width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); color: var(--text); padding: 14px 16px; border-radius: 12px; font-size: 1rem; transition: 0.2s; }
+    .form-control:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(0,240,255,0.1); }
+    
+    .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .option-card { background: rgba(15,23,42,0.6); border: 1px solid var(--border); padding: 16px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s; font-weight: 600; }
+    .option-card:hover { border-color: var(--teal); background: rgba(0,240,255,0.05); }
+    .option-card.selected { border-color: var(--teal); background: rgba(0,240,255,0.15); box-shadow: 0 0 15px rgba(0,240,255,0.2); }
+
+    .btn-primary { width: 100%; background: linear-gradient(135deg, #00C6FF, #0072FF); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,114,255,0.2); margin-top: 10px; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,114,255,0.3); }
+    .btn-secondary { width: 100%; background: transparent; color: var(--text-muted); border: 1px solid var(--border); padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 12px; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.05); color: white; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <div class="onboard-card">
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+
+    <!-- Step 1: Demographics -->
+    <div class="step active" id="step-1">
+      <h2>Welcome! Let's build your health baseline.</h2>
+      <p class="subtitle">MyPulsePro uses your age and biology to accurately calibrate your 60+ biomarker threshold ranges.</p>
+      
+      <div class="form-group">
+        <label>Biological Sex</label>
+        <div class="option-grid" id="gender-select">
+          <div class="option-card" data-val="Male">Male</div>
+          <div class="option-card" data-val="Female">Female</div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Age (Years)</label>
+        <input type="number" id="age" class="form-control" placeholder="e.g. 32" min="10" max="100">
+      </div>
+
+      <button class="btn-primary" id="btn-next-2">Continue</button>
+    </div>
+
+    <!-- Step 2: Lifestyle & Habits -->
+    <div class="step" id="step-2">
+      <h2>What does your daily life look like?</h2>
+      <p class="subtitle">Your daily habits significantly influence your metabolic health over time.</p>
+      
+      <div class="form-group">
+        <label>Activity Level</label>
+        <select class="form-control" id="activity">
+          <option value="Sedentary">Sedentary (Office job, little exercise)</option>
+          <option value="Moderate">Moderate (Exercise 2-3 days/week)</option>
+          <option value="Active">Highly Active (Exercise 5+ days/week)</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>Dietary Preference</label>
+        <select class="form-control" id="diet">
+          <option value="Anything">Anything / Omnivore</option>
+          <option value="Vegetarian">Strict Vegetarian</option>
+          <option value="Vegan">Vegan</option>
+          <option value="Keto">Keto / Low Carb</option>
+        </select>
+      </div>
+
+      <button class="btn-primary" id="btn-next-3">Continue</button>
+      <button class="btn-secondary" id="btn-back-1">Back</button>
+    </div>
+
+    <!-- Step 3: Goals -->
+    <div class="step" id="step-3">
+      <h2>What is your primary goal?</h2>
+      <p class="subtitle">We will customize your daily quests and AI recommendations based on your unique target.</p>
+      
+      <div class="form-group">
+        <div class="option-grid" style="grid-template-columns: 1fr;" id="goal-select">
+          <div class="option-card" data-val="Longevity">🧬 Maximize Longevity & Lifespan</div>
+          <div class="option-card" data-val="Weight">📉 Lose Weight & Burn Fat</div>
+          <div class="option-card" data-val="Muscle">💪 Build Muscle & Strength</div>
+          <div class="option-card" data-val="Energy">⚡ Boost Daily Energy Focus</div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btn-finish">Launch Dashboard</button>
+      <button class="btn-secondary" id="btn-back-2">Back</button>
+    </div>
+  </div>
+
+  <script>
+    // Handle Option Card Selection
+    document.querySelectorAll('.option-grid').forEach(grid => {
+      grid.addEventListener('click', (e) => {
+        if(e.target.classList.contains('option-card')) {
+          grid.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+          e.target.classList.add('selected');
+        }
+      });
+    });
+
+    function nextStep(step) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById('step-' + step).classList.add('active');
+      document.getElementById('progress').style.width = (step * 33.3) + '%';
+    }
+
+    function finishOnboarding() {
+      const btn = document.getElementById('btn-finish');
+      btn.textContent = 'Generating Your Profile...';
+      
+      // Trigger Next-Gen Gamification: Canvas Confetti
+      var duration = 3000;
+      var end = Date.now() + duration;
+
+      (function frame() {
+        // Fire confetti from edges
+        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#00F0FF', '#FF4B4B', '#FFFFFF'] });
+        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#00F0FF', '#FF4B4B', '#FFFFFF'] });
+        
+        if (Date.now() < end) requestAnimationFrame(frame);
+      }());
+
+      // Save onboarding flag and redirect
+      setTimeout(() => {
+        localStorage.setItem('onboarding_complete', 'true');
+        window.location.href = '/app.html';
+      }, 2500);
+    }
+
+    // Attach Event Listeners to remove CSP inline-script violations
+    document.getElementById('btn-next-2').addEventListener('click', () => nextStep(2));
+    document.getElementById('btn-next-3').addEventListener('click', () => nextStep(3));
+    document.getElementById('btn-back-1').addEventListener('click', () => nextStep(1));
+    document.getElementById('btn-back-2').addEventListener('click', () => nextStep(2));
+    document.getElementById('btn-finish').addEventListener('click', () => finishOnboarding());
+  </script>
+</body>
+</html>

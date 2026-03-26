@@ -12,6 +12,12 @@ if (!localStorage.getItem('auth_token')) {
   return; // Stop execution
 }
 
+// ─── Onboarding Guard ───────────────────────────────────────────
+if (!localStorage.getItem('onboarding_complete')) {
+  window.location.replace('/onboarding.html');
+  return; // Force new users to complete health questionnaire
+}
+
 // ─── State ──────────────────────────────────────────────────────
 let currentPage = 'dashboard';
 let progressChart = null;
@@ -56,22 +62,53 @@ function drawScoreRing(score) {
   const canvas = document.getElementById('health-score-ring');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  const size = 160, cx = size/2, cy = size/2, r = 65, lw = 10;
-  ctx.clearRect(0, 0, size, size);
+  const size = 160, centerX = size/2, centerY = size/2, radius = 65; // Renamed cx, cy, r
+  
+  // Background Ring
+  ctx.clearRect(0, 0, size, size); // Use size for clearRect
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+  ctx.lineWidth = 14;
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+  ctx.stroke();
 
-  // Background ring
-  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.strokeStyle = '#1E293B'; ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.stroke();
+  // Dynamic SVG-style Animated Drawing
+  const duration = 1500; // ms
+  const start = performance.now();
+  // const endAngle = -0.5 * Math.PI + (score / 100) * (2 * Math.PI); // Not directly used in drawFrame
 
-  // Score arc
-  const angle = (score / 100) * Math.PI * 2 - Math.PI / 2;
-  const grad = ctx.createLinearGradient(0, 0, size, size);
-  if (score >= 75) { grad.addColorStop(0, '#00F0FF'); grad.addColorStop(1, '#06B6D4'); } /* Neon Teal */
-  else if (score >= 50) { grad.addColorStop(0, '#F59E0B'); grad.addColorStop(1, '#FF4B4B'); } /* Coral Pink */
-  else { grad.addColorStop(0, '#EF4444'); grad.addColorStop(1, '#FF4B4B'); }
-  ctx.beginPath(); ctx.arc(cx, cy, r, -Math.PI / 2, angle);
-  ctx.strokeStyle = grad; ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.stroke();
+  const drawFrame = (now) => {
+    let progress = Math.min((now - start) / duration, 1);
+    // ease-out cubic
+    progress = 1 - Math.pow(1 - progress, 3);
+    
+    ctx.clearRect(0, 0, size, size); // Use size for clearRect
+    
+    // Redraw BG
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    ctx.lineWidth = 14;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.stroke();
 
+    if (score > 0) {
+      const currentEndAngle = -0.5 * Math.PI + ((score / 100) * (2 * Math.PI) * progress);
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, -0.5 * Math.PI, currentEndAngle);
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = score >= 75 ? '#00F0FF' : score >= 50 ? '#FDE047' : '#EF4444';
+      
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = ctx.strokeStyle;
+      ctx.stroke();
+      ctx.shadowBlur = 0; // reset
+    }
+
+    if (progress < 1) requestAnimationFrame(drawFrame);
+  };
+  requestAnimationFrame(drawFrame);
+
+  // Set numeric text
   document.getElementById('health-score-val').textContent = score;
   document.getElementById('health-score-val').style.color = '#F8FAFC'; // White text
 
@@ -87,6 +124,7 @@ function drawScoreRing(score) {
     // Trigger Level Up Popup if level increased on re-render
     if (prevLevel && prevLevel !== newLevel) {
       showGamifiedPopup('Level Up!', '+200 XP', '🚀');
+      window.triggerConfetti();
     }
     
     levelEl.textContent = newLevel;
@@ -96,11 +134,41 @@ function drawScoreRing(score) {
 }
 
 // ─── Dashboard ──────────────────────────────────────────────────
-async function loadDashboard() {
+// ─── Gamification Engine ───
+window.triggerConfetti = function() {
+  if (typeof confetti !== 'undefined') {
+    var duration = 3 * 1000;
+    var end = Date.now() + duration;
+    (function frame() {
+      confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#00F0FF', '#FF4B4B', '#FFFFFF'] });
+      confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#00F0FF', '#FF4B4B', '#FFFFFF'] });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    }());
+  }
+};
+
+window.completeQuest = function(checkbox) {
+  const checkboxes = document.querySelectorAll('.quest-item input');
+  let checkedCount = 0;
+  checkboxes.forEach(cb => { if(cb.checked) checkedCount++; });
+  const pct = (checkedCount / checkboxes.length) * 100;
+  document.getElementById('quest-progress-bar').style.width = pct + '%';
+  if (pct === 100) {
+    showGamifiedPopup('All Quests Completed!', '+500 XP', '🏆');
+    window.triggerConfetti();
+  }
+};
+
+async function fetchDashboardData() {
   const [summary, tipsData] = await Promise.all([
     api('/api/biomarkers/summary'),
     api('/api/health-ai/tips'),
   ]);
+  return { summary, tipsData };
+}
+
+async function loadDashboard() {
+  const { summary, tipsData } = await fetchDashboardData();
 
   if (summary.success) {
     drawScoreRing(summary.score);
@@ -635,6 +703,7 @@ function initGamification() {
           card.style.borderColor = 'var(--green)';
           card.style.boxShadow = '0 0 20px rgba(16,185,129,0.3)';
           showGamifiedPopup('Hydration Goal Met!', '+50 XP', '💧');
+          window.triggerConfetti();
           setTimeout(() => { card.style.borderColor = 'var(--border)'; card.style.boxShadow = 'none'; }, 2000);
         }
       }

@@ -6,9 +6,11 @@
   <title>MyPulsePro — Biomarker Tracking Platform</title>
   <meta name="description" content="Track 60+ health biomarkers with medical-grade visualizations, diet tracking, and AI health assistant">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <link rel="stylesheet" href="/css/app.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+  
+  <!-- Gamification Libraries Phase 9 -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
   <!-- ─── Sidebar ─── -->
@@ -80,20 +82,41 @@
 
     <!-- ─── Dashboard Page ─── -->
     <section class="page active" id="page-dashboard">
-      <!-- Health Score Row -->
-      <div class="score-row">
-        <div class="health-score-card">
-          <div class="score-ring-wrap">
+      <!-- Top Row: Score + Vitals + Quests -->
+      <div class="dashboard-top-row" style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 24px; margin-bottom: 24px;">
+        
+        <!-- Health Score Circular UI -->
+        <div class="health-score-card option-card cascade delay-2" style="padding:24px;">
+          <h3 style="margin-bottom:16px;">Overall Score</h3>
+          <div class="score-ring-wrap" style="margin:0 auto;">
             <canvas id="health-score-ring" width="160" height="160"></canvas>
             <div class="score-center">
               <span class="score-value" id="health-score-val">—</span>
-              <span class="score-label" id="health-level-val" style="color:var(--primary); font-weight:700;">Level 1</span>
             </div>
           </div>
-          <div class="score-stats" id="score-stats"></div>
+          <div class="meta-stats" style="margin-top:16px; text-align:center;">
+            <span id="health-level-val" data-current-level="" style="font-weight:700;">Lvl 1: Starter</span>
+          </div>
         </div>
+
         <!-- Vital Cards -->
-        <div class="vitals-grid" id="vitals-grid"></div>
+        <div class="vitals-grid cascade delay-3" id="vitals-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;"></div>
+
+        <!-- Daily Quests Widget -->
+        <div class="quest-widget option-card cascade delay-4" style="padding: 24px; display: flex; flex-direction: column; justify-content: center;">
+          <h3 style="margin-bottom: 16px; font-size: 1.1rem; display:flex; align-items:center; gap:8px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            Daily Quests
+          </h3>
+          <div id="quest-list" style="display: flex; flex-direction: column; gap: 12px;">
+            <label style="display:flex; align-items:center; gap:12px; cursor:pointer;" class="quest-item"><input type="checkbox" id="quest-1" onchange="window.completeQuest(this)" style="width:18px; height:18px; accent-color:#00F0FF;"> <span>Log 8 Glasses of Water</span></label>
+            <label style="display:flex; align-items:center; gap:12px; cursor:pointer;" class="quest-item"><input type="checkbox" id="quest-2" onchange="window.completeQuest(this)" style="width:18px; height:18px; accent-color:#00F0FF;"> <span>Review Biological Metrics</span></label>
+            <label style="display:flex; align-items:center; gap:12px; cursor:pointer;" class="quest-item"><input type="checkbox" id="quest-3" onchange="window.completeQuest(this)" style="width:18px; height:18px; accent-color:#00F0FF;"> <span>Chat with Health AI</span></label>
+          </div>
+          <div style="margin-top: 20px; height: 6px; background: rgba(255,255,255,0.1); border-radius:3px; overflow:hidden;">
+            <div id="quest-progress-bar" style="height:100%; width:0%; background: #00F0FF; transition: 0.5s ease; box-shadow: 0 0 10px #00F0FF;"></div>
+          </div>
+        </div>
       </div>
 
       <!-- Daily Goals -->

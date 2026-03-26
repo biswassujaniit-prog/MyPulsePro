@@ -60,15 +60,23 @@ function drawScoreRing(score) {
   // Score arc
   const angle = (score / 100) * Math.PI * 2 - Math.PI / 2;
   const grad = ctx.createLinearGradient(0, 0, size, size);
-  if (score >= 75) { grad.addColorStop(0, '#10B981'); grad.addColorStop(1, '#06B6D4'); }
-  else if (score >= 50) { grad.addColorStop(0, '#F59E0B'); grad.addColorStop(1, '#F97316'); }
-  else { grad.addColorStop(0, '#EF4444'); grad.addColorStop(1, '#F97316'); }
+  if (score >= 75) { grad.addColorStop(0, '#00F0FF'); grad.addColorStop(1, '#06B6D4'); } /* Neon Teal */
+  else if (score >= 50) { grad.addColorStop(0, '#F59E0B'); grad.addColorStop(1, '#FF4B4B'); } /* Coral Pink */
+  else { grad.addColorStop(0, '#EF4444'); grad.addColorStop(1, '#FF4B4B'); }
   ctx.beginPath(); ctx.arc(cx, cy, r, -Math.PI / 2, angle);
   ctx.strokeStyle = grad; ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.stroke();
 
-  document.getElementById('health-score-val').textContent = score + '%';
-  document.getElementById('health-score-val').style.color =
-    score >= 75 ? '#10B981' : score >= 50 ? '#F59E0B' : '#EF4444';
+  document.getElementById('health-score-val').textContent = score;
+  document.getElementById('health-score-val').style.color = '#F8FAFC'; // White text
+
+  // Calculate Gamified Level
+  const levelNames = ['Starter', 'Explorer', 'Achiever', 'Pro', 'Health Ninja'];
+  const levelIdx = Math.min(4, Math.floor(score / 20)); // Score 0-100 gives idx 0-4
+  const levelEl = document.getElementById('health-level-val');
+  if (levelEl) {
+    levelEl.textContent = `Lvl ${levelIdx + 1}: ${levelNames[levelIdx]}`;
+    levelEl.style.color = score >= 75 ? 'var(--primary)' : score >= 50 ? 'var(--amber)' : 'var(--red)';
+  }
 }
 
 // ─── Dashboard ──────────────────────────────────────────────────
@@ -560,6 +568,65 @@ function initMenuToggle() {
   });
 }
 
+// ─── Gamification Hooks ─────────────────────────────────────────
+function initGamification() {
+  // Streak System (Mocked to 12 via localStorage if first time)
+  let streak = localStorage.getItem('appStreak') || '12';
+  localStorage.setItem('appStreak', streak);
+  const streakEl = document.getElementById('streak-count');
+  if (streakEl) streakEl.textContent = `Day ${streak} Streak!`;
+
+  // Water Tracker
+  let waterCount = parseInt(localStorage.getItem('waterCount') || '0');
+  const lastWaterDate = localStorage.getItem('lastWaterDate');
+  const today = new Date().toDateString();
+
+  if (lastWaterDate !== today) {
+    waterCount = 0;
+    localStorage.setItem('waterCount', 0);
+    localStorage.setItem('lastWaterDate', today);
+  }
+
+  const waterEl = document.getElementById('water-count');
+  const btnWater = document.getElementById('btn-log-water');
+
+  function updateWaterUI() {
+    if (waterEl) waterEl.innerHTML = `${waterCount}<span style="font-size:0.9rem; color:var(--text-muted)">/8</span>`;
+    if (btnWater) {
+      if (waterCount >= 8) {
+        btnWater.textContent = '✓';
+        btnWater.style.background = 'var(--green-bg)';
+        btnWater.style.color = 'var(--green)';
+      } else {
+        btnWater.textContent = '+';
+      }
+    }
+  }
+
+  if (btnWater) {
+    btnWater.onclick = () => {
+      if (waterCount < 8) {
+        waterCount++;
+        localStorage.setItem('waterCount', waterCount);
+        updateWaterUI();
+        // Micro-animation
+        btnWater.style.transform = 'scale(0.8)';
+        setTimeout(() => btnWater.style.transform = 'scale(1)', 150);
+        
+        // Minor celebration at 8 glasses
+        if (waterCount === 8) {
+          const card = btnWater.closest('.category-card');
+          card.style.borderColor = 'var(--green)';
+          card.style.boxShadow = '0 0 20px rgba(16,185,129,0.3)';
+          setTimeout(() => { card.style.borderColor = 'var(--border)'; card.style.boxShadow = 'none'; }, 2000);
+        }
+      }
+    };
+  }
+
+  updateWaterUI();
+}
+
 // ─── Init ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
   // Navigation
@@ -574,6 +641,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initMenuToggle();
   initPeriodBtns();
   initChat();
+  initGamification();
   loadDashboard();
 });
 

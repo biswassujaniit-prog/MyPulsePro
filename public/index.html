@@ -3,233 +3,127 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MyPulsePro — Biomarker Tracking Platform</title>
-  <meta name="description" content="Track 60+ health biomarkers with medical-grade visualizations, diet tracking, and AI health assistant">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <link rel="stylesheet" href="/css/app.css">
+  <title>MyPulsePro | Precision Health & Daily Wellness</title>
+  <style>
+    :root {
+      --bg: #0B0F19;
+      --surface: rgba(30, 41, 59, 0.6);
+      --teal: #00F0FF;
+      --coral: #FF4B4B;
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); overflow-x: hidden; }
+    
+    /* Background Elements */
+    .bg-glow { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(0,240,255,0.15) 0%, rgba(11,15,25,0) 70%); top: -200px; left: -200px; z-index: -1; pointer-events: none; }
+    .bg-glow-right { position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, rgba(255,75,75,0.1) 0%, rgba(11,15,25,0) 70%); bottom: 10%; right: -100px; z-index: -1; pointer-events: none; }
+    
+    /* Nav */
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 24px 5%; backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .brand { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    .brand svg { color: var(--teal); width: 28px; }
+    .btn-nav { background: transparent; color: var(--text); border: none; font-weight: 600; cursor: pointer; padding: 10px 20px; border-radius: 8px; transition: 0.2s; }
+    .btn-nav:hover { background: rgba(255,255,255,0.1); }
+    
+    /* Hero */
+    .hero { text-align: center; padding: 120px 20px 80px; max-width: 900px; margin: 0 auto; }
+    .badge { display: inline-block; background: rgba(0,240,255,0.1); color: var(--teal); padding: 6px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; margin-bottom: 24px; border: 1px solid rgba(0,240,255,0.2); }
+    .hero h1 { font-size: 4rem; font-weight: 800; line-height: 1.1; margin-bottom: 24px; letter-spacing: -1px; }
+    .text-gradient { background: linear-gradient(135deg, var(--teal), var(--coral)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 1.25rem; color: var(--text-muted); margin-bottom: 40px; max-width: 600px; margin-inline: auto; line-height: 1.6; }
+    
+    /* Buttons */
+    .btn-primary { background: linear-gradient(135deg, #00C6FF, #0072FF); color: white; border: none; padding: 16px 36px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px rgba(0,114,255,0.3); transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; display: inline-block; }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,114,255,0.4); }
+    
+    /* Social Proof */
+    .social-proof { display: flex; justify-content: center; gap: 40px; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 40px 20px; margin-bottom: 80px; flex-wrap: wrap; }
+    .stat { text-align: center; }
+    .stat .val { font-size: 2rem; font-weight: 800; color: white; display: block; }
+    .stat .label { color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; display: block; }
+
+    /* Features Grid */
+    .features { padding: 0 5%; max-width: 1200px; margin: 0 auto 100px; }
+    .section-title { text-align: center; font-size: 2.5rem; margin-bottom: 60px; font-weight: 800; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+    .feature-card { background: var(--surface); border: 1px solid rgba(255,255,255,0.05); padding: 40px; border-radius: 20px; backdrop-filter: blur(10px); transition: 0.3s; }
+    .feature-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.15); background: rgba(30, 41, 59, 0.8); }
+    .f-icon { width: 50px; height: 50px; background: rgba(255,255,255,0.05); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 24px; }
+    .feature-card h3 { font-size: 1.5rem; margin-bottom: 12px; }
+    .feature-card p { color: var(--text-muted); line-height: 1.5; }
+
+    /* CTA Section */
+    .cta-section { text-align: center; padding: 100px 20px; background: linear-gradient(to top, rgba(0,240,255,0.05), transparent); border-top: 1px solid rgba(255,255,255,0.05); }
+    .cta-section h2 { font-size: 3rem; margin-bottom: 24px; }
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.5rem; }
+      .nav, .social-proof { flex-direction: column; gap: 20px; }
+      .feature-card { padding: 30px 20px; }
+    }
+  </style>
 </head>
 <body>
-  <!-- ─── Sidebar ─── -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <div class="brand-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-      </div>
-      <span class="brand-text">MyPulsePro</span>
+  <div class="bg-glow"></div>
+  <div class="bg-glow-right"></div>
+
+  <nav>
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      MyPulsePro
     </div>
-    <nav class="sidebar-nav">
-      <a class="nav-item active" data-page="dashboard" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        <span>Dashboard</span>
-      </a>
-      <a class="nav-item" data-page="biomarkers" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-        <span>Biomarkers</span>
-      </a>
-      <a class="nav-item" data-page="progress" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <span>Progress</span>
-      </a>
-      <a class="nav-item" data-page="diet" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-        <span>Diet Tracker</span>
-      </a>
-      <a class="nav-item" data-page="activity" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-        <span>Activity</span>
-      </a>
-      <a class="nav-item" data-page="ai" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-        <span>Health AI</span>
-      </a>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="user-badge">
-        <div class="user-avatar">SB</div>
-        <div class="user-info">
-          <span class="user-name">Sujan Biswas</span>
-          <span class="user-id">ID: user-001</span>
-        </div>
+    <div class="nav-links">
+      <button class="btn-nav">Features</button>
+      <a href="/app.html" class="btn-primary" style="padding: 10px 24px; font-size: 0.95rem; border-radius: 8px;">Log In</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="badge">🔥 India's #1 Daily Wellness Engine</div>
+    <h1>Your Complete Intelligence for <span class="text-gradient">Health & Energy</span></h1>
+    <p>Track 60+ clinical biomarkers, log daily habits, connect your wearables, and achieve your peak shape with an AI personal coach.</p>
+    <a href="/app.html" class="btn-primary">Start Your Transformation</a>
+    <p style="margin-top:20px; font-size:0.85rem; color:var(--text-muted)">Free forever. No credit card required.</p>
+  </section>
+
+  <section class="social-proof">
+    <div class="stat"><span class="val">1.2M+</span><span class="label">Vitals Logged</span></div>
+    <div class="stat"><span class="val">60+</span><span class="label">Biomarkers</span></div>
+    <div class="stat"><span class="val">4.9/5</span><span class="label">App Store Rating</span></div>
+  </section>
+
+  <section class="features">
+    <h2 class="section-title">Everything you need to level up.</h2>
+    <div class="grid">
+      <div class="feature-card" style="border-top: 2px solid var(--teal)">
+        <div class="f-icon">🧬</div>
+        <h3>Medical-Grade Dashboard</h3>
+        <p>Sync your blood tests to track LDL, HbA1c, Vitamin D, and over 60 critical biomarkers in stunning visualizations.</p>
+      </div>
+      <div class="feature-card" style="border-top: 2px solid var(--coral)">
+        <div class="f-icon">🔥</div>
+        <h3>Daily Streaks & Habits</h3>
+        <p>Log your daily water intake, hit your 10k steps, and build burning streaks to unlock premium health levels.</p>
+      </div>
+      <div class="feature-card" style="border-top: 2px solid #F59E0B">
+        <div class="f-icon">⌚</div>
+        <h3>Wearable Sync</h3>
+        <p>Connect Apple Health, Garmin, Google Fit, and Fitbit seamlessly to aggregate active minutes and resting HR.</p>
+      </div>
+      <div class="feature-card" style="border-top: 2px solid #A855F7">
+        <div class="f-icon">🤖</div>
+        <h3>AI Health Coach</h3>
+        <p>Chat with your clinically trained AI to decode complex lab results into personalized daily nutrition plans.</p>
       </div>
     </div>
-  </aside>
+  </section>
 
-  <!-- ─── Main Content ─── -->
-  <main class="main-content" id="main-content">
-    <!-- Header -->
-    <header class="top-header">
-      <button class="menu-toggle" id="menu-toggle">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-      <div class="header-title">
-        <h1 id="page-title">Dashboard</h1>
-        <span class="header-subtitle" id="page-subtitle">Your health at a glance</span>
-      </div>
-      <div class="header-actions">
-        <span class="header-badge" id="header-badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          <span id="last-updated">Loading...</span>
-        </span>
-      </div>
-    </header>
-
-    <!-- ─── Dashboard Page ─── -->
-    <section class="page active" id="page-dashboard">
-      <!-- Health Score Row -->
-      <div class="score-row">
-        <div class="health-score-card">
-          <div class="score-ring-wrap">
-            <canvas id="health-score-ring" width="160" height="160"></canvas>
-            <div class="score-center">
-              <span class="score-value" id="health-score-val">—</span>
-              <span class="score-label">Health Score</span>
-            </div>
-          </div>
-          <div class="score-stats" id="score-stats"></div>
-        </div>
-        <!-- Vital Cards -->
-        <div class="vitals-grid" id="vitals-grid"></div>
-      </div>
-
-      <!-- Category Overview -->
-      <h2 class="section-title">Test Categories</h2>
-      <div class="categories-grid" id="categories-grid"></div>
-
-      <!-- Quick Tips -->
-      <h2 class="section-title">Quick Pro Tips</h2>
-      <div class="tips-grid" id="tips-grid"></div>
-    </section>
-
-    <!-- ─── Biomarkers Page ─── -->
-    <section class="page" id="page-biomarkers">
-      <div class="bio-nav" id="bio-nav"></div>
-      <div class="bio-content" id="bio-content"></div>
-    </section>
-
-    <!-- ─── Progress Page ─── -->
-    <section class="page" id="page-progress">
-      <div class="progress-controls">
-        <select id="progress-biomarker" class="select-input"></select>
-        <div class="period-btns">
-          <button class="period-btn active" data-days="7">7D</button>
-          <button class="period-btn" data-days="30">1M</button>
-          <button class="period-btn" data-days="90">3M</button>
-          <button class="period-btn" data-days="180">6M</button>
-        </div>
-      </div>
-      <div class="chart-container">
-        <canvas id="progress-chart"></canvas>
-      </div>
-      <div class="progress-stats" id="progress-stats"></div>
-    </section>
-
-    <!-- ─── Diet Page ─── -->
-    <section class="page" id="page-diet">
-      <div class="diet-layout">
-        <div class="diet-left">
-          <h3 class="sub-title">Diet Comparison (Actual vs Recommended)</h3>
-          <div class="chart-container"><canvas id="diet-chart"></canvas></div>
-          <div class="diet-breakdown" id="diet-breakdown"></div>
-        </div>
-        <div class="diet-right">
-          <h3 class="sub-title">Log Meal</h3>
-          <form id="diet-form" class="diet-form">
-            <select id="meal-type" class="select-input">
-              <option value="breakfast">Breakfast</option>
-              <option value="lunch">Lunch</option>
-              <option value="snack">Snack</option>
-              <option value="dinner">Dinner</option>
-            </select>
-            <input type="text" id="meal-items" class="text-input" placeholder="Items (comma-separated)">
-            <div class="macro-inputs">
-              <input type="number" id="meal-cal" class="text-input" placeholder="Calories">
-              <input type="number" id="meal-protein" class="text-input" placeholder="Protein (g)">
-              <input type="number" id="meal-carbs" class="text-input" placeholder="Carbs (g)">
-              <input type="number" id="meal-fat" class="text-input" placeholder="Fat (g)">
-            </div>
-            <button type="submit" class="btn-primary">Log Meal</button>
-          </form>
-          <h3 class="sub-title" style="margin-top:24px">Recommended Plan</h3>
-          <div id="diet-plan"></div>
-        </div>
-      </div>
-    </section>
-    <!-- ─── Activity Page ─── -->
-    <section class="page" id="page-activity">
-      <!-- Wearable Connect Section -->
-      <h2 class="section-title">Connected Devices</h2>
-      <div class="devices-grid" id="devices-grid">
-        <!-- Rendered via JS -->
-      </div>
-      
-      <div class="activity-layout">
-        <!-- KPIs Section -->
-        <div class="activity-left">
-          <h2 class="section-title">Today's Activity</h2>
-          <div class="activity-kpis" id="activity-kpis">
-            <!-- Rendered via JS -->
-          </div>
-        </div>
-        
-        <!-- Manual Log Section -->
-        <div class="activity-right">
-          <h2 class="section-title">Log Exercise</h2>
-          <form id="activity-form" class="activity-form">
-            <select id="exercise-type" class="select-input" required>
-              <option value="" disabled selected>Select Exercise</option>
-              <option value="Running">Running</option>
-              <option value="Walking">Walking</option>
-              <option value="Cycling">Cycling</option>
-              <option value="Swimming">Swimming</option>
-              <option value="Yoga">Yoga</option>
-              <option value="HIIT">HIIT</option>
-              <option value="Weightlifting">Weightlifting</option>
-            </select>
-            <div style="display:flex; gap:16px; margin-top:16px;">
-              <input type="number" id="exercise-duration" class="text-input" placeholder="Duration (mins)" required style="flex:1">
-              <select id="exercise-intensity" class="select-input" required style="flex:1">
-                <option value="Low">Low Intensity</option>
-                <option value="Medium">Medium Intensity</option>
-                <option value="High">High Intensity</option>
-              </select>
-            </div>
-            <div class="auth-error" id="activity-error"></div>
-            <div class="auth-success" id="activity-success"></div>
-            <button type="submit" class="btn-primary" style="margin-top:16px; width:100%">Log Activity</button>
-          </form>
-        </div>
-      </div>
-    </section>
-
-    <!-- ─── AI Chat Page ─── -->
-    <section class="page" id="page-ai">
-      <div class="chat-container">
-        <div class="chat-messages" id="chat-messages">
-          <div class="chat-msg bot">
-            <div class="msg-avatar">AI</div>
-            <div class="msg-bubble">Hello! I'm your Health AI assistant. Ask me about your biomarker results, diet recommendations, or health risks. Try: <strong>"Give me a health summary"</strong></div>
-          </div>
-        </div>
-        <div class="chat-quick-actions">
-          <button class="quick-btn" data-q="Give me a health summary">Health Summary</button>
-          <button class="quick-btn" data-q="Explain my lipid profile">Lipid Profile</button>
-          <button class="quick-btn" data-q="How is my blood pressure?">Blood Pressure</button>
-          <button class="quick-btn" data-q="What should I eat?">Diet Advice</button>
-          <button class="quick-btn" data-q="Am I at risk for anything?">Risk Check</button>
-          <button class="quick-btn" data-q="How is my blood sugar?">Blood Sugar</button>
-        </div>
-        <form class="chat-input-row" id="chat-form">
-          <input type="text" id="chat-input" class="chat-text-input" placeholder="Ask about your health reports..." autocomplete="off">
-          <button type="submit" class="chat-send-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          </button>
-        </form>
-      </div>
-    </section>
-  </main>
-
-  <script src="/js/app.js"></script>
+  <section class="cta-section">
+    <h2>Ready to take control?</h2>
+    <p style="color:var(--text-muted); margin-bottom:40px; font-size:1.1rem">Join thousands of Indians upgrading their metabolic and mental health daily.</p>
+    <a href="/app.html" class="btn-primary" style="transform:scale(1.1)">Get MyPulsePro Free</a>
+  </section>
 </body>
 </html>

@@ -26,6 +26,10 @@ app.use('/api/diet', require('./routes/diet'));
 app.use('/api/health-ai', require('./routes/health-ai'));
 app.use('/api/activity', require('./routes/activity'));
 app.use('/api/auth', require('./routes/auth')); // Gamified Auth
+app.use('/api/medications', require('./routes/medications')); // Phase 10: Medicine Tracker
+
+// ─── Gamification & Alert Engines ───────────────────────────────
+require('./services/alertEngine');
 
 // ─── SPA catch-all ──────────────────────────────────────────────
 app.get('*', (req, res) => {

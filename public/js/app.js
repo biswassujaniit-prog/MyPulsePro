@@ -49,6 +49,7 @@ function navigate(page) {
   if (page === 'progress') loadProgress();
   if (page === 'diet') loadDiet();
   if (page === 'activity') loadActivity();
+  if (page === 'medications') loadMedications();
 }
 
 // ─── API Helper ─────────────────────────────────────────────────
@@ -166,6 +167,20 @@ async function fetchDashboardData() {
   ]);
   return { summary, tipsData };
 }
+
+// Local Polling loop for Native Dashboard Alerts (Checks med schedules every 30s)
+setInterval(async () => {
+  if (currentPage !== 'dashboard') return;
+  const res = await api('/api/medications');
+  if (res.success && res.data) {
+    const currentHourMin = new Date().toLocaleTimeString('en-US', { hour12: false, hour: 'numeric', minute: 'numeric' });
+    res.data.forEach(m => {
+      if (!m.takenToday && m.times.includes(currentHourMin)) {
+         showGamifiedPopup(`Time for ${m.name}!`, `Dosage: ${m.dosage}`, '💊');
+      }
+    });
+  }
+}, 30000);
 
 async function loadDashboard() {
   const { summary, tipsData } = await fetchDashboardData();
@@ -736,6 +751,107 @@ window.showGamifiedPopup = function(title, points, emoji) {
   }, 4000);
 }
 
+// ─── Medications Phase 10 ───────────────────────────────────────
+async function loadMedications() {
+  const tl = document.getElementById('meds-timeline');
+  if (!tl) return;
+  tl.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding: 20px;">Fetching schedule from database...</div>';
+  
+  const res = await api('/api/medications');
+  if (res.success) {
+    const meds = res.data;
+    if (meds.length === 0) {
+      tl.innerHTML = '<div style="color:var(--text-muted); padding:20px;">No active prescriptions. Upload an image to auto-extract schedules.</div>';
+      return;
+    }
+    
+    let html = '';
+    meds.forEach(med => {
+      const isTakenClass = med.takenToday ? 'taken' : '';
+      const checkIcon = med.takenToday ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' : '';
+      html += `
+        <div class="timeline-item ${isTakenClass}" id="med-node-${med.id}">
+          <div class="pill-card">
+             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                   <h3 style="font-size:1.1rem; color: #fff; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                     ${med.name} ${checkIcon}
+                   </h3>
+                   <div style="font-size:0.9rem; color:var(--text-muted); margin-bottom:12px;">
+                     ${med.dosage} • ${med.frequency} • <span style="color:#FDE047">${med.times.join(', ')}</span>
+                   </div>
+                </div>
+                <!-- Action Button -->
+                <button class="btn-take-pill" onclick="window.logMedication('${med.id}')">Mark as Taken</button>
+             </div>
+          </div>
+        </div>
+      `;
+    });
+    tl.innerHTML = html;
+  }
+}
+
+// Drag, Drop, and Upload Tesseract Flow
+function initMedicationsDropzone() {
+  const fileInput = document.getElementById('prescription-file');
+  const dropzone = document.getElementById('med-dropzone');
+  if (dropzone && fileInput) {
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.style.borderColor = 'var(--teal)'; });
+    dropzone.addEventListener('dragleave', () => dropzone.style.borderColor = 'rgba(255,255,255,0.2)');
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.style.borderColor = 'rgba(255,255,255,0.2)';
+      if (e.dataTransfer.files.length) uploadPrescription(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) uploadPrescription(fileInput.files[0]);
+    });
+  }
+}
+
+async function uploadPrescription(file) {
+  document.getElementById('upload-idle').style.display = 'none';
+  document.getElementById('upload-scanning').style.display = 'block';
+  
+  const formData = new FormData();
+  formData.append('prescription', file);
+  
+  try {
+    const res = await fetch('/api/medications/upload', {
+      method: 'POST',
+      body: formData // No Content-Type, browser sets it w/ boundaries
+    });
+    const result = await res.json();
+    
+    document.getElementById('upload-scanning').style.display = 'none';
+    document.getElementById('upload-idle').style.display = 'block';
+    
+    if (result.success) {
+       showGamifiedPopup('AI Parse Successful!', `Extracted ${result.added.length} meds from document.`, '🤖');
+       window.triggerConfetti();
+       loadMedications(); // Re-render the timeline
+    } else {
+       alert(result.message);
+    }
+  } catch (error) {
+    document.getElementById('upload-scanning').style.display = 'none';
+    document.getElementById('upload-idle').style.display = 'block';
+    console.error(error);
+  }
+}
+
+window.logMedication = async function(id) {
+  const res = await api('/api/medications/log', 'POST', { id });
+  if (res.success) {
+     const node = document.getElementById('med-node-' + id);
+     node.classList.add('taken');
+     showGamifiedPopup('Dose Logged', '+50 Health Points', '✓');
+     window.triggerConfetti();
+  }
+};
+
 // ─── Init ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
   // Navigation
@@ -751,6 +867,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initPeriodBtns();
   initChat();
   initGamification();
+  initMedicationsDropzone();
   loadDashboard();
 });
 

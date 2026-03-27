@@ -38,6 +38,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
         <span>Diet Tracker</span>
       </a>
+      <a class="nav-item" data-page="medications" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h10.96"/></svg>
+        <span>Medications</span>
+      </a>
       <a class="nav-item" data-page="activity" href="#">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
         <span>Activity</span>
@@ -269,6 +273,44 @@
         </form>
       </div>
     </section>
+
+    <!-- ─── Medications Page ─── -->
+    <section class="page" id="page-medications">
+      <div class="meds-layout" style="display:grid; grid-template-columns: 1fr 1.5fr; gap:24px;">
+        
+        <!-- Left: OCR Upload Engine -->
+        <div class="meds-left option-card cascade delay-1">
+          <h2 class="section-title">Upload Prescription</h2>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:16px;">Our AI automatically extracts medicine, dosage, and frequency from phone pictures or PDFs.</p>
+          
+          <div id="med-dropzone" class="upload-zone" style="border: 2px dashed rgba(255,255,255,0.2); border-radius: 16px; padding: 40px; text-align: center; cursor: pointer; transition: 0.3s background; background: rgba(11,15,25,0.4); position: relative; overflow: hidden;">
+            <div id="upload-idle">
+               <svg viewBox="0 0 24 24" width="48" height="48" stroke="var(--teal)" stroke-width="1.5" fill="none" style="margin-bottom:12px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+               <h3 style="font-size:1.1rem;">Click or Drag Prescription Image</h3>
+               <p style="color:var(--text-muted); font-size:0.85rem; margin-top:8px;">Supports JPG, PNG, PDF</p>
+            </div>
+            <!-- Radar Scanner Animation Overlay -->
+            <div id="upload-scanning" style="display:none;">
+               <div class="scanner-laser"></div>
+               <h3 style="color:var(--teal)">Transcribing & Analyzing Text...</h3>
+               <p style="color:var(--text-muted); font-size:0.85rem; margin-top:8px;">Running local Tesseract OCR Engine</p>
+            </div>
+            <input type="file" id="prescription-file" accept="image/*" style="display:none;">
+          </div>
+          
+          <div id="med-parse-results" style="margin-top:24px;"></div>
+        </div>
+        
+        <!-- Right: Daily Adherence Timeline -->
+        <div class="meds-right">
+          <h2 class="section-title cascade delay-2">Today's Schedule</h2>
+          <div class="adherence-timeline cascade delay-3" id="meds-timeline">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <script src="/js/app.js"></script>

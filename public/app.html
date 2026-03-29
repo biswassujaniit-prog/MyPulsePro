@@ -299,6 +299,24 @@
           </div>
           
           <div id="med-parse-results" style="margin-top:24px;"></div>
+          
+          <!-- Manual Entry Fallback -->
+          <div style="margin-top: 24px; border-top: 1px solid var(--border); padding-top: 20px;">
+            <h3 style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 12px;">✏️ Or Add Manually</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <input type="text" id="manual-med-name" placeholder="Medicine name (e.g., Metformin)" style="background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); padding: 10px 14px; border-radius: 8px; font-size: 0.9rem;">
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="manual-med-dose" placeholder="Dosage (e.g., 500mg)" style="flex:1; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); padding: 10px 14px; border-radius: 8px; font-size: 0.9rem;">
+                <select id="manual-med-freq" style="flex:1; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); padding: 10px 14px; border-radius: 8px; font-size: 0.9rem;">
+                  <option value="OD">Once Daily (OD)</option>
+                  <option value="BD">Twice Daily (BD)</option>
+                  <option value="TDS">Thrice Daily (TDS)</option>
+                  <option value="Night">Night Only</option>
+                </select>
+              </div>
+              <button id="btn-add-manual-med" style="background: linear-gradient(135deg, #00C6FF, #0072FF); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s;">+ Add Medicine</button>
+            </div>
+          </div>
         </div>
         
         <!-- Right: Daily Adherence Timeline -->

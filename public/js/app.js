@@ -53,8 +53,15 @@ function navigate(page) {
 }
 
 // ─── API Helper ─────────────────────────────────────────────────
-async function api(url, opts) {
-  const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+async function api(url, methodOrOpts, body) {
+  const opts = { headers: { 'Content-Type': 'application/json' } };
+  if (methodOrOpts && typeof methodOrOpts === 'string') {
+    opts.method = methodOrOpts;
+    if (body) opts.body = JSON.stringify(body);
+  } else if (methodOrOpts && typeof methodOrOpts === 'object') {
+    Object.assign(opts, methodOrOpts);
+  }
+  const r = await fetch(url, opts);
   return r.json();
 }
 
@@ -809,11 +816,37 @@ function initMedicationsDropzone() {
       if (fileInput.files.length) uploadPrescription(fileInput.files[0]);
     });
   }
+  
+  // Manual entry button
+  const manualBtn = document.getElementById('btn-add-manual-med');
+  if (manualBtn) {
+    manualBtn.addEventListener('click', async () => {
+      const name = document.getElementById('manual-med-name').value.trim();
+      const dosage = document.getElementById('manual-med-dose').value.trim();
+      const freq = document.getElementById('manual-med-freq').value;
+      if (!name) { alert('Please enter medicine name'); return; }
+      
+      const freqTimes = { OD: ['08:00'], BD: ['08:00','20:00'], TDS: ['08:00','14:00','20:00'], Night: ['22:00'] };
+      const res = await api('/api/medications/manual', 'POST', { name, dosage: dosage || '1 Dose', frequency: freq, times: freqTimes[freq] || ['08:00'] });
+      if (res.success) {
+        showGamifiedPopup('Medicine Added!', `${name} scheduled.`, '💊');
+        window.triggerConfetti();
+        document.getElementById('manual-med-name').value = '';
+        document.getElementById('manual-med-dose').value = '';
+        loadMedications();
+      }
+    });
+  }
 }
 
 async function uploadPrescription(file) {
-  document.getElementById('upload-idle').style.display = 'none';
-  document.getElementById('upload-scanning').style.display = 'block';
+  const idleEl = document.getElementById('upload-idle');
+  const scanEl = document.getElementById('upload-scanning');
+  const resultsEl = document.getElementById('med-parse-results');
+  
+  idleEl.style.display = 'none';
+  scanEl.style.display = 'block';
+  resultsEl.innerHTML = '';
   
   const formData = new FormData();
   formData.append('prescription', file);
@@ -821,23 +854,33 @@ async function uploadPrescription(file) {
   try {
     const res = await fetch('/api/medications/upload', {
       method: 'POST',
-      body: formData // No Content-Type, browser sets it w/ boundaries
+      body: formData
     });
     const result = await res.json();
     
-    document.getElementById('upload-scanning').style.display = 'none';
-    document.getElementById('upload-idle').style.display = 'block';
+    scanEl.style.display = 'none';
+    idleEl.style.display = 'block';
     
     if (result.success) {
-       showGamifiedPopup('AI Parse Successful!', `Extracted ${result.added.length} meds from document.`, '🤖');
+       showGamifiedPopup('AI Parse Successful!', `Extracted ${result.added.length} meds.`, '🤖');
        window.triggerConfetti();
-       loadMedications(); // Re-render the timeline
+       
+       // Show OCR extracted text for transparency
+       resultsEl.innerHTML = `
+         <div style="background: rgba(0,240,255,0.05); border: 1px solid rgba(0,240,255,0.2); border-radius: 12px; padding: 16px; margin-top: 16px;">
+           <h4 style="color: var(--teal); margin-bottom: 8px; font-size: 0.9rem;">📜 OCR Extracted Text</h4>
+           <pre style="color: var(--text-muted); font-size: 0.8rem; white-space: pre-wrap; max-height: 150px; overflow-y: auto; font-family: monospace;">${(result.ocrText || '').substring(0, 500)}</pre>
+           <p style="color: var(--teal); font-size: 0.85rem; margin-top: 8px;">✔ ${result.added.length} medicine(s) extracted and scheduled</p>
+         </div>
+       `;
+       loadMedications();
     } else {
-       alert(result.message);
+       resultsEl.innerHTML = `<p style="color: var(--coral);">⚠ ${result.message}. Use manual entry below.</p>`;
     }
   } catch (error) {
-    document.getElementById('upload-scanning').style.display = 'none';
-    document.getElementById('upload-idle').style.display = 'block';
+    scanEl.style.display = 'none';
+    idleEl.style.display = 'block';
+    resultsEl.innerHTML = '<p style="color: var(--coral);">⚠ Upload failed. Try manual entry.</p>';
     console.error(error);
   }
 }

@@ -3,127 +3,506 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MyPulsePro | Precision Health & Daily Wellness</title>
+  <title>MyPulsePro | India's #1 Precision Wellness & Daily Health Platform</title>
+  <meta name="description" content="Track 60+ biomarkers, manage prescriptions with AI, build daily wellness streaks, and level up your health. Free forever.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0B0F19;
       --surface: rgba(30, 41, 59, 0.6);
       --teal: #00F0FF;
       --coral: #FF4B4B;
+      --amber: #FDE047;
+      --purple: #A855F7;
       --text: #F8FAFC;
       --text-muted: #94A3B8;
+      --gradient-primary: linear-gradient(135deg, #00C6FF, #0072FF);
+      --gradient-warm: linear-gradient(135deg, #FF6B6B, #FF8E53);
     }
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
     body { background-color: var(--bg); color: var(--text); overflow-x: hidden; }
-    
-    /* Background Elements */
-    .bg-glow { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(0,240,255,0.15) 0%, rgba(11,15,25,0) 70%); top: -200px; left: -200px; z-index: -1; pointer-events: none; }
-    .bg-glow-right { position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, rgba(255,75,75,0.1) 0%, rgba(11,15,25,0) 70%); bottom: 10%; right: -100px; z-index: -1; pointer-events: none; }
-    
-    /* Nav */
-    nav { display: flex; justify-content: space-between; align-items: center; padding: 24px 5%; backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .brand { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-    .brand svg { color: var(--teal); width: 28px; }
-    .btn-nav { background: transparent; color: var(--text); border: none; font-weight: 600; cursor: pointer; padding: 10px 20px; border-radius: 8px; transition: 0.2s; }
-    .btn-nav:hover { background: rgba(255,255,255,0.1); }
-    
-    /* Hero */
-    .hero { text-align: center; padding: 120px 20px 80px; max-width: 900px; margin: 0 auto; }
-    .badge { display: inline-block; background: rgba(0,240,255,0.1); color: var(--teal); padding: 6px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; margin-bottom: 24px; border: 1px solid rgba(0,240,255,0.2); }
-    .hero h1 { font-size: 4rem; font-weight: 800; line-height: 1.1; margin-bottom: 24px; letter-spacing: -1px; }
-    .text-gradient { background: linear-gradient(135deg, var(--teal), var(--coral)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-    .hero p { font-size: 1.25rem; color: var(--text-muted); margin-bottom: 40px; max-width: 600px; margin-inline: auto; line-height: 1.6; }
-    
-    /* Buttons */
-    .btn-primary { background: linear-gradient(135deg, #00C6FF, #0072FF); color: white; border: none; padding: 16px 36px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px rgba(0,114,255,0.3); transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; display: inline-block; }
-    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,114,255,0.4); }
-    
-    /* Social Proof */
-    .social-proof { display: flex; justify-content: center; gap: 40px; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 40px 20px; margin-bottom: 80px; flex-wrap: wrap; }
-    .stat { text-align: center; }
-    .stat .val { font-size: 2rem; font-weight: 800; color: white; display: block; }
-    .stat .label { color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; display: block; }
 
-    /* Features Grid */
-    .features { padding: 0 5%; max-width: 1200px; margin: 0 auto 100px; }
-    .section-title { text-align: center; font-size: 2.5rem; margin-bottom: 60px; font-weight: 800; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-    .feature-card { background: var(--surface); border: 1px solid rgba(255,255,255,0.05); padding: 40px; border-radius: 20px; backdrop-filter: blur(10px); transition: 0.3s; }
-    .feature-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.15); background: rgba(30, 41, 59, 0.8); }
-    .f-icon { width: 50px; height: 50px; background: rgba(255,255,255,0.05); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 24px; }
-    .feature-card h3 { font-size: 1.5rem; margin-bottom: 12px; }
-    .feature-card p { color: var(--text-muted); line-height: 1.5; }
+    /* ─── Animated Background ─── */
+    .bg-orb {
+      position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: -1;
+      animation: orbFloat 20s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 600px; height: 600px; background: rgba(0,240,255,0.12); top: -200px; left: -200px; }
+    .orb-2 { width: 500px; height: 500px; background: rgba(255,75,75,0.08); bottom: 10%; right: -100px; animation-delay: -10s; }
+    .orb-3 { width: 400px; height: 400px; background: rgba(168,85,247,0.08); top: 50%; left: 30%; animation-delay: -5s; }
+    @keyframes orbFloat {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -20px) scale(1.1); }
+      100% { transform: translate(-20px, 30px) scale(0.95); }
+    }
 
-    /* CTA Section */
-    .cta-section { text-align: center; padding: 100px 20px; background: linear-gradient(to top, rgba(0,240,255,0.05), transparent); border-top: 1px solid rgba(255,255,255,0.05); }
-    .cta-section h2 { font-size: 3rem; margin-bottom: 24px; }
+    /* ─── Navbar ─── */
+    .navbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 5%; backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 100;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      background: rgba(11,15,25,0.8);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-size: 1.4rem; font-weight: 800; }
+    .brand svg { color: var(--teal); width: 28px; height: 28px; }
+    .nav-links { display: flex; align-items: center; gap: 8px; }
+    .btn-nav { background: transparent; color: var(--text-muted); border: none; font-weight: 600; cursor: pointer; padding: 10px 18px; border-radius: 8px; transition: 0.2s; font-size: 0.9rem; }
+    .btn-nav:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+    .btn-cta-nav { background: var(--gradient-primary); color: white; border: none; padding: 10px 24px; border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,114,255,0.3); transition: 0.2s; text-decoration: none; }
+    .btn-cta-nav:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,114,255,0.4); }
 
+    /* ─── Announcement Banner ─── */
+    .announcement-bar {
+      background: linear-gradient(90deg, rgba(0,240,255,0.15), rgba(168,85,247,0.15));
+      text-align: center; padding: 10px 20px; font-size: 0.85rem; font-weight: 600;
+      border-bottom: 1px solid rgba(0,240,255,0.1);
+      animation: shimmer 3s ease-in-out infinite;
+    }
+    .announcement-bar a { color: var(--teal); text-decoration: underline; margin-left: 8px; }
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; opacity: 0.9; }
+    }
+
+    /* ─── Hero Section ─── */
+    .hero { text-align: center; padding: 100px 20px 60px; max-width: 960px; margin: 0 auto; position: relative; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(0,240,255,0.08); color: var(--teal);
+      padding: 8px 20px; border-radius: 24px; font-size: 0.85rem; font-weight: 600;
+      margin-bottom: 28px; border: 1px solid rgba(0,240,255,0.15);
+      animation: fadeInUp 0.6s ease-out;
+    }
+    .hero h1 {
+      font-size: 3.8rem; font-weight: 900; line-height: 1.08;
+      margin-bottom: 24px; letter-spacing: -2px;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+    .text-gradient { background: linear-gradient(135deg, var(--teal), #0072FF, var(--purple)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 40px; max-width: 640px; margin-inline: auto; line-height: 1.6; animation: fadeInUp 0.8s ease-out 0.4s both; }
+    .hero-actions { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; animation: fadeInUp 0.8s ease-out 0.6s both; }
+    .btn-primary { background: var(--gradient-primary); color: white; border: none; padding: 16px 40px; border-radius: 14px; font-size: 1.1rem; font-weight: 700; cursor: pointer; box-shadow: 0 8px 30px rgba(0,114,255,0.3); transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 12px 40px rgba(0,114,255,0.4); }
+    .btn-secondary-hero { background: rgba(255,255,255,0.06); color: var(--text); border: 1px solid rgba(255,255,255,0.12); padding: 16px 36px; border-radius: 14px; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: 0.2s; text-decoration: none; }
+    .btn-secondary-hero:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+
+    /* ─── Animated Stats Ticker ─── */
+    .stats-ticker {
+      display: flex; justify-content: center; gap: 48px; padding: 48px 20px;
+      border-top: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06);
+      animation: fadeInUp 1s ease-out 0.8s both;
+    }
+    .ticker-item { text-align: center; }
+    .ticker-val { font-size: 2.4rem; font-weight: 900; background: var(--gradient-primary); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .ticker-label { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px; font-weight: 600; }
+
+    /* ─── Scrolling Feature Banner ─── */
+    .scroll-banner {
+      overflow: hidden; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+      background: rgba(0,240,255,0.03);
+    }
+    .scroll-track {
+      display: flex; gap: 60px; animation: scrollX 25s linear infinite;
+      white-space: nowrap;
+    }
+    .scroll-track span { font-size: 0.9rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
+    @keyframes scrollX {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ─── Feature Cards Grid ─── */
+    .features { padding: 100px 5%; max-width: 1200px; margin: 0 auto; }
+    .section-header { text-align: center; margin-bottom: 60px; }
+    .section-header h2 { font-size: 2.8rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 16px; }
+    .section-header p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+    .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+    .feature-card {
+      background: var(--surface); border: 1px solid rgba(255,255,255,0.06);
+      padding: 36px; border-radius: 20px; backdrop-filter: blur(10px);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s, box-shadow 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--card-accent, var(--teal)); opacity: 0.8;
+    }
+    .feature-card:hover {
+      transform: translateY(-8px); border-color: rgba(255,255,255,0.15);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+    .f-icon { width: 52px; height: 52px; background: rgba(255,255,255,0.05); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 20px; }
+    .feature-card h3 { font-size: 1.3rem; margin-bottom: 10px; font-weight: 700; }
+    .feature-card p { color: var(--text-muted); line-height: 1.5; font-size: 0.95rem; }
+
+    /* ─── Testimonials ─── */
+    .testimonials { padding: 80px 5%; max-width: 1200px; margin: 0 auto; }
+    .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+    .testimonial-card {
+      background: var(--surface); border: 1px solid rgba(255,255,255,0.06);
+      padding: 32px; border-radius: 16px; transition: 0.3s;
+    }
+    .testimonial-card:hover { border-color: rgba(0,240,255,0.2); }
+    .t-stars { color: var(--amber); font-size: 1.1rem; margin-bottom: 12px; }
+    .t-text { color: var(--text-muted); line-height: 1.6; font-size: 0.95rem; margin-bottom: 16px; font-style: italic; }
+    .t-author { display: flex; align-items: center; gap: 12px; }
+    .t-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--gradient-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+    .t-name { font-weight: 600; font-size: 0.9rem; }
+    .t-title { color: var(--text-muted); font-size: 0.8rem; }
+
+    /* ─── Ad Placeholder Banner ─── */
+    .ad-banner-container { padding: 40px 5%; max-width: 1200px; margin: 0 auto; }
+    .ad-banner {
+      background: linear-gradient(135deg, rgba(0,240,255,0.08), rgba(168,85,247,0.08));
+      border: 1px dashed rgba(255,255,255,0.12); border-radius: 16px;
+      padding: 40px; text-align: center; position: relative;
+    }
+    .ad-label { position: absolute; top: 8px; right: 12px; font-size: 0.65rem; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+    .ad-banner h3 { font-size: 1.4rem; margin-bottom: 8px; }
+    .ad-banner p { color: var(--text-muted); font-size: 0.95rem; }
+
+    /* ─── CTA Section ─── */
+    .cta-section {
+      text-align: center; padding: 100px 20px;
+      background: linear-gradient(to top, rgba(0,240,255,0.06), transparent);
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .cta-section h2 { font-size: 3rem; margin-bottom: 16px; font-weight: 900; }
+    .cta-section p { color: var(--text-muted); max-width: 500px; margin: 0 auto 40px; font-size: 1.1rem; }
+
+    /* ─── Footer ─── */
+    footer {
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 40px 5%; display: flex; justify-content: space-between; align-items: center;
+      color: var(--text-muted); font-size: 0.85rem; flex-wrap: wrap; gap: 20px;
+    }
+    footer a { color: var(--text-muted); text-decoration: none; transition: 0.2s; }
+    footer a:hover { color: var(--teal); }
+
+    /* ─── Help Chatbot Widget ─── */
+    .chatbot-fab {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      width: 60px; height: 60px; border-radius: 50%;
+      background: var(--gradient-primary); border: none;
+      color: white; font-size: 28px; cursor: pointer;
+      box-shadow: 0 8px 30px rgba(0,114,255,0.4);
+      transition: transform 0.3s, box-shadow 0.3s;
+      display: flex; align-items: center; justify-content: center;
+      animation: pulse-glow 2s infinite;
+    }
+    .chatbot-fab:hover { transform: scale(1.1); }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 8px 30px rgba(0,114,255,0.4); }
+      50% { box-shadow: 0 8px 40px rgba(0,240,255,0.6), 0 0 20px rgba(0,240,255,0.3); }
+    }
+    .chatbot-window {
+      position: fixed; bottom: 100px; right: 24px; z-index: 9999;
+      width: 380px; max-height: 500px; border-radius: 20px;
+      background: rgba(15,23,42,0.95); backdrop-filter: blur(20px);
+      border: 1px solid rgba(0,240,255,0.15);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      display: none; flex-direction: column; overflow: hidden;
+    }
+    .chatbot-window.open { display: flex; animation: slideUp 0.3s ease-out; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .chatbot-header {
+      padding: 16px 20px; background: rgba(0,240,255,0.08);
+      border-bottom: 1px solid rgba(0,240,255,0.1);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .chatbot-header h4 { font-size: 0.95rem; font-weight: 700; }
+    .chatbot-close { background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; }
+    .chatbot-body { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; min-height: 200px; }
+    .chat-bubble { padding: 12px 16px; border-radius: 14px; font-size: 0.9rem; line-height: 1.5; max-width: 85%; }
+    .chat-bubble.bot { background: rgba(0,240,255,0.08); border: 1px solid rgba(0,240,255,0.1); align-self: flex-start; }
+    .chat-bubble.user { background: var(--gradient-primary); align-self: flex-end; }
+    .chatbot-input-row { display: flex; padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.06); gap: 8px; }
+    .chatbot-input { flex: 1; background: rgba(30,41,59,0.6); border: 1px solid rgba(255,255,255,0.1); padding: 10px 16px; border-radius: 12px; color: var(--text); font-size: 0.9rem; }
+    .chatbot-input:focus { outline: none; border-color: var(--teal); }
+    .chatbot-send { width: 40px; height: 40px; border-radius: 50%; border: none; background: var(--teal); color: var(--bg); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+    /* ─── Animations ─── */
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeInUp 0.8s ease-out both; }
+
+    /* ─── Responsive ─── */
     @media (max-width: 768px) {
-      .hero h1 { font-size: 2.5rem; }
-      .nav, .social-proof { flex-direction: column; gap: 20px; }
-      .feature-card { padding: 30px 20px; }
+      .hero h1 { font-size: 2.5rem; letter-spacing: -1px; }
+      .stats-ticker { flex-direction: column; gap: 24px; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .navbar { padding: 12px 4%; }
+      .chatbot-window { width: calc(100% - 32px); right: 16px; }
     }
   </style>
 </head>
 <body>
-  <div class="bg-glow"></div>
-  <div class="bg-glow-right"></div>
+  <!-- Animated Background Orbs -->
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
 
-  <nav>
+  <!-- Announcement Banner -->
+  <div class="announcement-bar">
+    🎉 New: AI Prescription Scanner now live — upload your prescription and track medications automatically!
+    <a href="/register.html">Try it free →</a>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
     <div class="brand">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
       MyPulsePro
     </div>
     <div class="nav-links">
-      <button class="btn-nav">Features</button>
-      <a href="/login.html" class="btn-primary" style="padding: 10px 24px; font-size: 0.95rem; border-radius: 8px;">Log In</a>
+      <button class="btn-nav" onclick="document.querySelector('.features').scrollIntoView({behavior:'smooth'})">Features</button>
+      <button class="btn-nav" onclick="document.querySelector('.testimonials').scrollIntoView({behavior:'smooth'})">Reviews</button>
+      <a href="/login.html" class="btn-cta-nav">Log In</a>
     </div>
   </nav>
 
+  <!-- Hero Section -->
   <section class="hero">
-    <div class="badge">🔥 India's #1 Daily Wellness Engine</div>
+    <div class="hero-badge">🔥 India's #1 Daily Wellness Engine • 4.9★ Rating</div>
     <h1>Your Complete Intelligence for <span class="text-gradient">Health & Energy</span></h1>
-    <p>Track 60+ clinical biomarkers, log daily habits, connect your wearables, and achieve your peak shape with an AI personal coach.</p>
-    <a href="/register.html" class="btn-primary">Start Your Transformation</a>
-    <p style="margin-top:20px; font-size:0.85rem; color:var(--text-muted)">Free forever. No credit card required.</p>
+    <p>Track 60+ clinical biomarkers, manage prescriptions with AI, build daily wellness streaks, and achieve your peak shape with a personal health coach.</p>
+    <div class="hero-actions">
+      <a href="/register.html" class="btn-primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Start Your Transformation
+      </a>
+      <a href="#features" class="btn-secondary-hero">Learn More</a>
+    </div>
+    <p style="margin-top:24px; font-size:0.85rem; color:var(--text-muted)">Free forever • No credit card required • 10,000+ active users</p>
   </section>
 
-  <section class="social-proof">
-    <div class="stat"><span class="val">1.2M+</span><span class="label">Vitals Logged</span></div>
-    <div class="stat"><span class="val">60+</span><span class="label">Biomarkers</span></div>
-    <div class="stat"><span class="val">4.9/5</span><span class="label">App Store Rating</span></div>
+  <!-- Animated Stats Ticker -->
+  <section class="stats-ticker">
+    <div class="ticker-item"><span class="ticker-val" id="stat-vitals">0</span><span class="ticker-label">Vitals Logged</span></div>
+    <div class="ticker-item"><span class="ticker-val">60+</span><span class="ticker-label">Biomarkers Tracked</span></div>
+    <div class="ticker-item"><span class="ticker-val" id="stat-users">0</span><span class="ticker-label">Active Users</span></div>
+    <div class="ticker-item"><span class="ticker-val">4.9/5</span><span class="ticker-label">User Rating</span></div>
+    <div class="ticker-item"><span class="ticker-val" id="stat-streaks">0</span><span class="ticker-label">Daily Streaks Built</span></div>
   </section>
 
-  <section class="features">
-    <h2 class="section-title">Everything you need to level up.</h2>
-    <div class="grid">
-      <div class="feature-card" style="border-top: 2px solid var(--teal)">
+  <!-- Scrolling Feature Banner -->
+  <div class="scroll-banner">
+    <div class="scroll-track">
+      <span>🧬 Biomarker Tracking</span><span>💊 AI Prescription Scanner</span><span>🔥 Daily Streaks</span>
+      <span>⌚ Wearable Sync</span><span>🤖 AI Health Coach</span><span>🥗 Diet Tracker</span>
+      <span>💧 Hydration Goals</span><span>📊 Progress Charts</span><span>🏆 Health Levels</span>
+      <span>🧬 Biomarker Tracking</span><span>💊 AI Prescription Scanner</span><span>🔥 Daily Streaks</span>
+      <span>⌚ Wearable Sync</span><span>🤖 AI Health Coach</span><span>🥗 Diet Tracker</span>
+      <span>💧 Hydration Goals</span><span>📊 Progress Charts</span><span>🏆 Health Levels</span>
+    </div>
+  </div>
+
+  <!-- Features Grid -->
+  <section class="features" id="features">
+    <div class="section-header">
+      <h2>Everything you need to <span class="text-gradient">level up</span>.</h2>
+      <p>Built for Indian users who take their health seriously. Powerful, beautiful, and completely free.</p>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card" style="--card-accent: var(--teal)">
         <div class="f-icon">🧬</div>
         <h3>Medical-Grade Dashboard</h3>
-        <p>Sync your blood tests to track LDL, HbA1c, Vitamin D, and over 60 critical biomarkers in stunning visualizations.</p>
+        <p>Sync blood tests to track LDL, HbA1c, Vitamin D, and over 60 critical biomarkers with stunning visualizations.</p>
       </div>
-      <div class="feature-card" style="border-top: 2px solid var(--coral)">
+      <div class="feature-card" style="--card-accent: var(--coral)">
+        <div class="f-icon">💊</div>
+        <h3>AI Prescription Scanner</h3>
+        <p>Upload your prescription photo — our Tesseract OCR Engine extracts medicines, dosages and builds automated dose reminders.</p>
+      </div>
+      <div class="feature-card" style="--card-accent: var(--amber)">
         <div class="f-icon">🔥</div>
-        <h3>Daily Streaks & Habits</h3>
-        <p>Log your daily water intake, hit your 10k steps, and build burning streaks to unlock premium health levels.</p>
+        <h3>Daily Streaks & Quests</h3>
+        <p>Log water, steps, and meals. Build burning streaks, complete daily quests, earn XP and unlock premium health levels.</p>
       </div>
-      <div class="feature-card" style="border-top: 2px solid #F59E0B">
+      <div class="feature-card" style="--card-accent: var(--purple)">
         <div class="f-icon">⌚</div>
         <h3>Wearable Sync</h3>
         <p>Connect Apple Health, Garmin, Google Fit, and Fitbit seamlessly to aggregate active minutes and resting HR.</p>
       </div>
-      <div class="feature-card" style="border-top: 2px solid #A855F7">
+      <div class="feature-card" style="--card-accent: #22C55E">
         <div class="f-icon">🤖</div>
         <h3>AI Health Coach</h3>
         <p>Chat with your clinically trained AI to decode complex lab results into personalized daily nutrition plans.</p>
       </div>
+      <div class="feature-card" style="--card-accent: #EC4899">
+        <div class="f-icon">👨‍👩‍👧</div>
+        <h3>Family Caregiver Alerts</h3>
+        <p>Designate a parent or caregiver who gets automated email alerts if you miss a medication dose. Free via SMTP.</p>
+      </div>
     </div>
   </section>
 
-  <section class="cta-section">
-    <h2>Ready to take control?</h2>
-    <p style="color:var(--text-muted); margin-bottom:40px; font-size:1.1rem">Join thousands of Indians upgrading their metabolic and mental health daily.</p>
-    <a href="/register.html" class="btn-primary" style="transform:scale(1.1)">Get MyPulsePro Free</a>
+  <!-- Ad Placeholder Banner -->
+  <div class="ad-banner-container">
+    <div class="ad-banner">
+      <span class="ad-label">Advertisement</span>
+      <h3>🏥 Partner with MyPulsePro</h3>
+      <p>Reach 10,000+ health-conscious users. Contact <strong>ads@mypulsepro.com</strong> for premium placement.</p>
+    </div>
+  </div>
+
+  <!-- Testimonials -->
+  <section class="testimonials">
+    <div class="section-header">
+      <h2>Loved by thousands.</h2>
+      <p>Real feedback from real users across India.</p>
+    </div>
+    <div class="testimonial-grid">
+      <div class="testimonial-card">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-text">"The prescription scanner is a game changer. I just take a photo and it creates my daily medicine schedule automatically!"</p>
+        <div class="t-author">
+          <div class="t-avatar">RK</div>
+          <div><div class="t-name">Rahul K.</div><div class="t-title">Mumbai, Maharashtra</div></div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-text">"As a caregiver for my parents, the missed-dose email alerts give me peace of mind. Best health app in India."</p>
+        <div class="t-author">
+          <div class="t-avatar">PS</div>
+          <div><div class="t-name">Priya S.</div><div class="t-title">Bengaluru, Karnataka</div></div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-text">"60+ biomarkers in one dashboard with trend charts — this is what every thyroid patient needs. Brilliant!"</p>
+        <div class="t-author">
+          <div class="t-avatar">AM</div>
+          <div><div class="t-name">Anil M.</div><div class="t-title">Kolkata, West Bengal</div></div>
+        </div>
+      </div>
+    </div>
   </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <h2>Ready to take <span class="text-gradient">control</span>?</h2>
+    <p>Join thousands of Indians upgrading their metabolic and mental health daily.</p>
+    <a href="/register.html" class="btn-primary" style="transform:scale(1.1)">
+      Get MyPulsePro Free
+    </a>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div>© 2026 MyPulsePro. Built with ❤️ in India.</div>
+    <div style="display:flex; gap:20px;">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Contact</a>
+      <a href="https://github.com/biswassujaniit-prog/MyPulsePro" target="_blank">GitHub</a>
+    </div>
+  </footer>
+
+  <!-- Help Chatbot Widget -->
+  <button class="chatbot-fab" id="chatbot-toggle" aria-label="Open help chat">💬</button>
+  <div class="chatbot-window" id="chatbot-window">
+    <div class="chatbot-header">
+      <h4>🤖 MyPulsePro Support</h4>
+      <button class="chatbot-close" id="chatbot-close">✕</button>
+    </div>
+    <div class="chatbot-body" id="chatbot-body">
+      <div class="chat-bubble bot">Hi! 👋 I'm your MyPulsePro assistant. How can I help you today?</div>
+    </div>
+    <div class="chatbot-input-row">
+      <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask anything…" autocomplete="off">
+      <button class="chatbot-send" id="chatbot-send">➤</button>
+    </div>
+  </div>
+
+  <script>
+    // ─── Animated Counter ───
+    function animateCounter(el, target, suffix='') {
+      let current = 0;
+      const step = Math.max(1, Math.ceil(target / 60));
+      const timer = setInterval(() => {
+        current += step;
+        if (current >= target) { current = target; clearInterval(timer); }
+        el.textContent = current.toLocaleString('en-IN') + suffix;
+      }, 30);
+    }
+    // Trigger on load
+    window.addEventListener('load', () => {
+      animateCounter(document.getElementById('stat-vitals'), 1247832, '+');
+      animateCounter(document.getElementById('stat-users'), 10482, '+');
+      animateCounter(document.getElementById('stat-streaks'), 89241, '+');
+    });
+
+    // ─── Chatbot Logic ───
+    const chatbotToggle = document.getElementById('chatbot-toggle');
+    const chatbotWindow = document.getElementById('chatbot-window');
+    const chatbotClose = document.getElementById('chatbot-close');
+    const chatbotInput = document.getElementById('chatbot-input');
+    const chatbotSend = document.getElementById('chatbot-send');
+    const chatbotBody = document.getElementById('chatbot-body');
+
+    chatbotToggle.addEventListener('click', () => chatbotWindow.classList.toggle('open'));
+    chatbotClose.addEventListener('click', () => chatbotWindow.classList.remove('open'));
+
+    const botResponses = {
+      'prescription': 'You can upload a prescription image on the Medications page. Our AI (Tesseract OCR) will automatically extract medicine names, dosages and create reminders for you!',
+      'biomarker': 'We track 60+ biomarkers including LDL, HbA1c, Vitamin D, TSH, Creatinine, and more. Upload your blood test reports to get started.',
+      'streak': 'Daily streaks track your consistency! Log water intake, exercise, or meals every day to build your streak and earn XP rewards.',
+      'free': 'Yes, MyPulsePro is 100% free forever! No hidden charges, no credit card required.',
+      'caregiver': 'You can designate a family member or caregiver in Settings. They will receive automated email alerts if you miss a medication dose.',
+      'wearable': 'We support Apple Health, Google Fit, Garmin, and Fitbit. Connect your device on the Activity tab in the dashboard.',
+      'default': "I'm here to help! You can ask me about features like prescription scanning, biomarker tracking, daily streaks, caregiver alerts, or wearable sync. For detailed support, email support@mypulsepro.com"
+    };
+
+    function addBotMessage(text) {
+      const bubble = document.createElement('div');
+      bubble.className = 'chat-bubble bot';
+      bubble.textContent = text;
+      chatbotBody.appendChild(bubble);
+      chatbotBody.scrollTop = chatbotBody.scrollHeight;
+    }
+
+    function handleChat() {
+      const msg = chatbotInput.value.trim();
+      if (!msg) return;
+      
+      // User message
+      const userBubble = document.createElement('div');
+      userBubble.className = 'chat-bubble user';
+      userBubble.textContent = msg;
+      chatbotBody.appendChild(userBubble);
+      chatbotInput.value = '';
+
+      // Bot response (keyword matching)
+      setTimeout(() => {
+        const lower = msg.toLowerCase();
+        let response = botResponses.default;
+        for (const [key, val] of Object.entries(botResponses)) {
+          if (key !== 'default' && lower.includes(key)) { response = val; break; }
+        }
+        addBotMessage(response);
+      }, 600);
+    }
+
+    chatbotSend.addEventListener('click', handleChat);
+    chatbotInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleChat(); });
+
+    // Intersection Observer for fade-in animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('fade-in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.feature-card, .testimonial-card, .ad-banner').forEach(el => {
+      el.style.opacity = '0';
+      observer.observe(el);
+    });
+  </script>
 </body>
 </html>

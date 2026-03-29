@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Log in to MyPulsePro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0B0F19;
@@ -17,7 +19,6 @@
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
     
-    /* Background Elements */
     .bg-glow { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(0,240,255,0.15) 0%, rgba(11,15,25,0) 70%); top: -200px; left: -200px; z-index: -1; }
     .bg-glow-right { position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, rgba(255,75,75,0.1) 0%, rgba(11,15,25,0) 70%); bottom: -100px; right: -100px; z-index: -1; }
     
@@ -49,13 +50,16 @@
     
     .btn-social { width: 100%; background: transparent; border: 1px solid var(--border); color: var(--text); padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 12px; }
     .btn-social:hover { background: rgba(255,255,255,0.05); }
-    .btn-social img { width: 20px; }
     
     .footer-text { text-align: center; margin-top: 32px; font-size: 0.9rem; color: var(--text-muted); }
     .footer-text a { color: var(--teal); text-decoration: none; font-weight: 600; }
     .footer-text a:hover { text-decoration: underline; }
 
     #error-msg { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #EF4444; padding: 12px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 20px; display: none; text-align: center; }
+    #success-msg { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #10B981; padding: 12px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 20px; display: none; text-align: center; }
+    
+    .demo-hint { background: rgba(0,240,255,0.06); border: 1px solid rgba(0,240,255,0.12); border-radius: 10px; padding: 12px; text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px; }
+    .demo-hint strong { color: var(--teal); }
   </style>
 </head>
 <body>
@@ -71,16 +75,21 @@
     <h2>Welcome Back!</h2>
     <p class="subtitle">Access your personal health intelligence.</p>
 
+    <div class="demo-hint">
+      🔑 Demo access: <strong>test_user</strong> / <strong>password</strong>
+    </div>
+
     <div id="error-msg"></div>
+    <div id="success-msg"></div>
 
     <form id="login-form">
       <div class="form-group">
         <label>Username / Email</label>
-        <input type="text" id="username" class="form-control" placeholder="e.g. test_user" required>
+        <input type="text" id="username" class="form-control" placeholder="e.g. test_user" required autocomplete="username">
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+        <input type="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
       </div>
       <button type="submit" class="btn-primary" id="btn-submit">Sign In to Dashboard</button>
     </form>
@@ -97,97 +106,79 @@
     </div>
   </div>
 
-  <script type="module">
-    // ─── Real Firebase Google Auth Integration ───
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-
-    // TODO: Paste your Firebase config here from console.firebase.google.com
-    const firebaseConfig = {
-      apiKey: "PASTE_YOUR_API_KEY_HERE",
-      authDomain: "your-app.firebaseapp.com",
-      projectId: "your-app",
-      storageBucket: "your-app.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:abcdef"
-    };
-
-    let auth, provider;
-    try {
-      const app = initializeApp(firebaseConfig);
-      auth = getAuth(app);
-      provider = new GoogleAuthProvider();
-    } catch (e) {
-      console.warn("Firebase not configured. Please paste your API keys.");
-    }
+  <script>
+    // ─── Auth Logic (No Firebase dependency for core login) ───
 
     const errBox = document.getElementById('error-msg');
+    const successBox = document.getElementById('success-msg');
 
-    // 1. Google Auth Flow
-    document.getElementById('btn-google').addEventListener('click', async () => {
-      if (!auth) {
-        errBox.style.display = 'block';
-        errBox.textContent = "Developer Note: Firebase API Keys are missing in login.html source code.";
-        return;
+    // If already logged in, redirect immediately
+    if (localStorage.getItem('auth_token')) {
+      if (!localStorage.getItem('onboarding_complete')) {
+        window.location.replace('/onboarding.html');
+      } else {
+        window.location.replace('/app.html');
       }
-      try {
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        // Verify token with backend securely
-        const token = await user.getIdToken();
-        localStorage.setItem('auth_token', token);
-        localStorage.setItem('username', user.displayName || user.email);
-        
-        // Custom backend check if new user -> redirect to onboarding
-        window.location.href = '/app.html';
-      } catch (error) {
-        errBox.style.display = 'block';
-        errBox.textContent = error.message;
-      }
-    });
+    }
 
-    // 2. Standard Email/Password Flow
+    // 1. Standard Username/Password Login via Backend API
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn = document.getElementById('btn-submit');
-      btn.textContent = 'Authenticating...';
+      errBox.style.display = 'none';
       
-      if (!auth) {
-        // Fallback simulation for testing without keys
-        const user = document.getElementById('username').value;
-        const pass = document.getElementById('password').value;
-        if (user === 'test_user' && pass === 'password') {
-          localStorage.setItem('auth_token', 'mock_jwt_test_user_8a9b7c6d');
-          localStorage.setItem('username', 'test_user');
-          window.location.href = '/app.html';
-          return;
-        }
-        errBox.style.display = 'block';
-        errBox.textContent = "Firebase missing. Demo fallback: use test_user / password";
-        btn.textContent = 'Sign In to Dashboard';
-        return;
-      }
+      const btn = document.getElementById('btn-submit');
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      
+      btn.textContent = 'Authenticating...';
+      btn.disabled = true;
 
       try {
-        const userCredential = await signInWithEmailAndPassword(
-          auth, 
-          document.getElementById('username').value, 
-          document.getElementById('password').value
-        );
-        const token = await userCredential.user.getIdToken();
-        localStorage.setItem('auth_token', token);
-        localStorage.setItem('username', userCredential.user.email);
-        window.location.href = '/app.html';
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          successBox.style.display = 'block';
+          successBox.textContent = '✓ Authenticated! Redirecting...';
+          
+          localStorage.setItem('auth_token', data.token);
+          localStorage.setItem('username', data.username);
+          
+          // test_user is a demo user — auto-skip onboarding
+          if (data.username === 'test_user') {
+            localStorage.setItem('onboarding_complete', 'true');
+          }
+          
+          setTimeout(() => {
+            if (!localStorage.getItem('onboarding_complete')) {
+              window.location.href = '/onboarding.html';
+            } else {
+              window.location.href = '/app.html';
+            }
+          }, 800);
+        } else {
+          errBox.style.display = 'block';
+          errBox.textContent = data.message || 'Invalid credentials.';
+          btn.textContent = 'Sign In to Dashboard';
+          btn.disabled = false;
+        }
       } catch (error) {
         errBox.style.display = 'block';
-        errBox.textContent = error.message;
+        errBox.textContent = 'Server connection error. Please try again.';
         btn.textContent = 'Sign In to Dashboard';
+        btn.disabled = false;
       }
     });
 
-    if (localStorage.getItem('auth_token')) {
-      window.location.href = '/app.html';
-    }
+    // 2. Google Sign-in (Firebase) — gracefully handle unconfigured state
+    document.getElementById('btn-google').addEventListener('click', async () => {
+      errBox.style.display = 'block';
+      errBox.innerHTML = '⚠️ Google Sign-In requires Firebase configuration.<br><small style="color:var(--text-muted)">Admin: Add your Firebase API keys to enable Google auth. For now, use username/password login.</small>';
+    });
   </script>
 </body>
 </html>

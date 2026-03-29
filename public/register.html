@@ -215,7 +215,7 @@
         btn.style.background = 'linear-gradient(135deg, #10B981, #06B6D4)';
         localStorage.setItem('auth_token', data.token);
         localStorage.setItem('username', data.username);
-        setTimeout(() => window.location.href = '/app.html', 1500);
+        setTimeout(() => window.location.href = '/onboarding.html', 1500);
       } else {
         alert(data.message || 'Error creating account');
         btn.textContent = 'Verify & Create Account';
@@ -229,56 +229,13 @@
         window.location.href = '/app.html';
       }
     }
-  </script>
 
-  <!-- Real Firebase SDK integration -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-
-    // TODO: Paste your Firebase config here from console.firebase.google.com
-    const firebaseConfig = {
-      apiKey: "PASTE_YOUR_API_KEY_HERE",
-      authDomain: "your-app.firebaseapp.com",
-      projectId: "your-app",
-      storageBucket: "your-app.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:abcdef"
-    };
-
-    let auth, provider;
-    try {
-      const app = initializeApp(firebaseConfig);
-      auth = getAuth(app);
-      provider = new GoogleAuthProvider();
-    } catch (e) {
-      console.warn("Firebase not configured. Please paste your API keys to use Google Registration.");
-    }
-
-    const errBox = document.getElementById('error-msg');
-    const btnGoogle = document.getElementById('btn-google');
-    if(btnGoogle) {
-      btnGoogle.addEventListener('click', async () => {
-        if (!auth) {
-          errBox.style.display = 'block';
-          errBox.textContent = "Developer Note: Firebase API Keys are missing in register.html.";
-          return;
-        }
-        try {
-          btnGoogle.textContent = 'Connecting...';
-          const result = await signInWithPopup(auth, provider);
-          const token = await result.user.getIdToken();
-          localStorage.setItem('auth_token', token);
-          localStorage.setItem('username', result.user.displayName || result.user.email);
-          // New Users forced to onboarding UI
-          window.location.href = '/onboarding.html';
-        } catch (error) {
-          errBox.style.display = 'block';
-          errBox.textContent = error.message;
-          btnGoogle.textContent = 'Sign up with Google';
-        }
-      });
-    }
+    // Google sign-up - graceful fallback when Firebase not configured
+    document.getElementById('btn-google').addEventListener('click', () => {
+      const errBox = document.getElementById('error-msg');
+      errBox.style.display = 'block';
+      errBox.innerHTML = '⚠️ Google Sign-Up requires Firebase configuration.<br><small style="color:var(--text-muted)">Admin: Add Firebase API keys to enable Google auth. Use email/mobile registration below.</small>';
+    });
   </script>
 </body>
 </html>

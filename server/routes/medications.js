@@ -10,9 +10,20 @@ const fs = require('fs');
 const Tesseract = require('tesseract.js');
 const crypto = require('crypto');
 
+// Ensure directories exist
+const uploadsDir = path.join(__dirname, '../uploads');
+const dataDir = path.join(__dirname, '../data');
+
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
 // Setup Multer for secure memory/temp file processing
-const upload = multer({ dest: path.join(__dirname, '../uploads/') });
-const dataPath = path.join(__dirname, '../data/medications.json');
+const upload = multer({ dest: uploadsDir });
+const dataPath = path.join(dataDir, 'medications.json');
 
 // Helper: Read/Write DB
 function getDB() {
@@ -20,6 +31,9 @@ function getDB() {
   return JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 }
 function saveDB(data) {
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
   fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
 }
 

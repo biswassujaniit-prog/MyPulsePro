@@ -819,9 +819,23 @@ function initPeriodBtns() {
 
 // ─── Menu Toggle (Mobile) ───────────────────────────────────────
 function initMenuToggle() {
-  document.getElementById('menu-toggle').addEventListener('click', () => {
-    document.getElementById('sidebar').classList.toggle('open');
-  });
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  const toggle = document.getElementById('menu-toggle');
+
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      backdrop.classList.toggle('active');
+    });
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      backdrop.classList.remove('active');
+    });
+  }
 }
 
 // ─── Gamification Hooks ─────────────────────────────────────────
@@ -1121,6 +1135,7 @@ document.addEventListener('DOMContentLoaded', function() {
       e.preventDefault();
       navigate(this.dataset.page);
       document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebar-backdrop')?.classList.remove('active');
     });
   });
 

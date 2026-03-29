@@ -1,37 +1,60 @@
 const express = require('express');
 const router = express.Router();
+const otpService = require('../services/otpService');
 
-// Mock standard JWT-style login
-router.post('/login', (req, res) => {
-  const { username, password } = req.body;
+// In-memory sessions (Username/Identifier -> JWT-Mock-Token)
+const sessionStore = new Map();
+
+/**
+ * Step 1: Request OTP
+ * Sends a 6-digit code to the user's identifier (email or mobile) 
+ */
+router.post('/otp/send', async (req, res) => {
+  const { identifier } = req.body;
+  if (!identifier) return res.status(400).json({ success: false, message: 'Identifier is required.' });
+
+  // Whitelist test_user to skip REAL sending if you want, but the user asked for REAL OTP
+  // For production feel, we'll send it even for test_user!
+  const result = await otpService.sendOTP(identifier);
   
-  // Hardcoded check for the global dashboard user
-  if ((username === 'test_user' || username === 'test_user@gmail.com') && password === 'password') {
-    return res.json({ 
-      success: true, 
-      token: 'jwt_mock_test_user_7b82x9', 
-      username: 'test_user' 
-    });
+  if (result.success) {
+    return res.json({ success: true, message: result.message });
+  } else {
+    return res.status(500).json({ success: false, message: result.message });
   }
-
-  // Reject invalid credentials to force standard login behavior
-  return res.status(401).json({ 
-    success: false, 
-    message: 'Invalid credentials. Please use test_user / password for the demo.' 
-  });
 });
 
-// Mock registration that auto-logs in the user
-router.post('/register', (req, res) => {
-  const { username, password, email, mobile } = req.body;
+/**
+ * Step 2: Verify OTP
+ * Checks code and returns authentication token if valid
+ */
+router.post('/otp/verify', (req, res) => {
+  const { identifier, otp } = req.body;
   
-  // Simulate DB Creation delay
-  setTimeout(() => {
+  if (!identifier || !otp) {
+    return res.status(400).json({ success: false, message: 'Identifier and OTP are required.' });
+  }
+
+  // Verify OTP
+  const isValid = otpService.verifyOTP(identifier, otp);
+  
+  if (isValid) {
+    const token = `jwt_otp_${Date.now()}_${identifier.substring(0,3)}`;
     return res.json({ 
       success: true, 
-      token: `jwt_mock_new_${Date.now()}`, 
-      username: username || 'new_user' 
+      token: token,
+      username: identifier.includes('@') ? identifier.split('@')[0] : identifier
     });
+  } else {
+    return res.status(401).json({ success: false, message: 'Invalid or expired OTP code.' });
+  }
+});
+
+// Mock registration (kept for compatibility)
+router.post('/register', (req, res) => {
+  const { username, password, email, mobile } = req.body;
+  setTimeout(() => {
+    return res.json({ success: true, token: `jwt_mock_new_${Date.now()}`, username: username || 'new_user' });
   }, 500); 
 });
 

@@ -117,7 +117,7 @@
       <div class="pulse-grid cascade delay-2">
         
         <!-- Activity Pulse -->
-        <div class="pulse-card" id="kpi-activity" style="--glow-color: var(--blue);">
+        <div class="pulse-card" id="kpi-activity" style="--glow-color: var(--blue);" onclick="navigate('activity')">
           <div class="pulse-header">
             <div class="pulse-icon">🏃</div>
             <div class="pulse-trend up">↑ 8%</div>
@@ -129,10 +129,13 @@
               <div id="kpi-steps-fill" class="xp-bar-fill" style="background:var(--blue); width:0%; box-shadow:none;"></div>
             </div>
           </div>
+          <button class="btn-detail-icon" onclick="event.stopPropagation(); window.openKPIWindow('activity')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </button>
         </div>
 
         <!-- Nutrition Pulse -->
-        <div class="pulse-card" id="kpi-diet" style="--glow-color: var(--green);">
+        <div class="pulse-card" id="kpi-diet" style="--glow-color: var(--green);" onclick="navigate('diet')">
           <div class="pulse-header">
             <div class="pulse-icon">🥗</div>
             <div class="pulse-trend" id="kpi-diet-trend">Balanced</div>
@@ -151,10 +154,13 @@
               </div>
             </div>
           </div>
+          <button class="btn-detail-icon" onclick="event.stopPropagation(); window.openKPIWindow('diet')">
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </button>
         </div>
 
         <!-- Medications Pulse -->
-        <div class="pulse-card" id="kpi-meds" style="--glow-color: var(--amber);">
+        <div class="pulse-card" id="kpi-meds" style="--glow-color: var(--amber);" onclick="navigate('medications')">
           <div class="pulse-header">
             <div class="pulse-icon">💊</div>
             <div class="pulse-subtext">Next Dose</div>
@@ -162,8 +168,10 @@
           <div class="pulse-body">
             <div class="pulse-value" id="next-med-time">—:—</div>
             <div class="pulse-unit" id="next-med-name">No meds scheduled</div>
-            <button class="btn-primary" onclick="navigate('medications')" style="margin-top:8px; padding:6px 12px; font-size:0.75rem;">View Full Schedule</button>
           </div>
+          <button class="btn-detail-icon" onclick="event.stopPropagation(); window.openKPIWindow('medications')">
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </button>
         </div>
 
         <!-- Daily Quests Widget -->
@@ -395,6 +403,32 @@
         <button class="fab-option" onclick="navigate('activity')" title="Log Exercise">🏃</button>
         <button class="fab-option" onclick="navigate('diet')" title="Log Meal">🥗</button>
         <button class="fab-option" onclick="navigate('medications')" title="Add Meds">💊</button>
+      </div>
+    </div>
+
+    <!-- ─── KPI Detail Window (Modal) ─── -->
+    <div id="kpi-detail-window" class="modal-window">
+      <div class="modal-backdrop" onclick="window.closeKPIWindow()"></div>
+      <div class="modal-content glass-card">
+        <button class="modal-close" onclick="window.closeKPIWindow()">×</button>
+        <div class="modal-header">
+          <div class="modal-icon" id="modal-icon">📈</div>
+          <div>
+            <h2 id="modal-title">Metric Trends</h2>
+            <p id="modal-subtitle">7-day performance overview</p>
+          </div>
+        </div>
+        <div class="modal-body">
+          <div class="chart-wrap">
+            <canvas id="modal-chart"></canvas>
+          </div>
+          <div class="modal-insights" id="modal-insights">
+             <!-- Dynamic AI Insights -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-primary" id="modal-nav-btn">View Full Segment</button>
+        </div>
       </div>
     </div>
 

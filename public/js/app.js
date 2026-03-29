@@ -24,7 +24,7 @@ let progressChart = null;
 let dietChart = null;
 
 // ─── SPA Router ─────────────────────────────────────────────────
-function navigate(page) {
+window.navigate = function(page) {
   currentPage = page;
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -39,6 +39,7 @@ function navigate(page) {
     progress: ['Progress Tracking', 'Track biomarker trends over time'],
     diet: ['Diet Tracker', 'Log meals and compare with recommended plan'],
     activity: ['Activity & Wearables', 'Log exercise and connect health devices'],
+    medications: ['Pharmacy', 'Prescription & adherence center'],
     ai: ['Health AI Assistant', 'Ask questions about your health reports'],
   };
   document.getElementById('page-title').textContent = titles[page]?.[0] || page;
@@ -50,7 +51,8 @@ function navigate(page) {
   if (page === 'diet') loadDiet();
   if (page === 'activity') loadActivity();
   if (page === 'medications') loadMedications();
-}
+};
+
 
 // ─── API Helper ─────────────────────────────────────────────────
 async function api(url, methodOrOpts, body) {
@@ -244,6 +246,73 @@ setInterval(async () => {
     });
   }
 }, 30000);
+
+// ─── Modal (Windows) Control ───
+window.openKPIWindow = async function(type) {
+  const modal = document.getElementById('kpi-detail-window');
+  const title = document.getElementById('modal-title');
+  const icon = document.getElementById('modal-icon');
+  const navBtn = document.getElementById('modal-nav-btn');
+  const insights = document.getElementById('modal-insights');
+  
+  modal.classList.add('active');
+  
+  // Set Modal Content based on type
+  const configs = {
+    activity: { title: 'Steps Trend', icon: '🏃', color: '#00F0FF', unit: 'Steps' },
+    diet: { title: 'Caloric Intake', icon: '🥗', color: '#10B981', unit: 'kcal' },
+    medications: { title: 'Dose Adherence', icon: '💊', color: '#F59E0B', unit: '%' }
+  };
+  
+  const cfg = configs[type] || configs.activity;
+  title.textContent = cfg.title;
+  icon.textContent = cfg.icon;
+  navBtn.onclick = () => { window.closeKPIWindow(); navigate(type); };
+  
+  // Fetch Mock History Data
+  const data = [65, 72, 68, 85, 92, 88, 95]; // Simulated 7-day trend
+  const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  
+  renderModalChart(labels, data, cfg.color, cfg.unit);
+  
+  // AI Insight
+  insights.innerHTML = `<strong>Pulse AI:</strong> Your ${type} has improved by 12% this week. Maintaining this trend will optimize your metabolic recovery.`;
+};
+
+window.closeKPIWindow = function() {
+  document.getElementById('kpi-detail-window').classList.remove('active');
+};
+
+function renderModalChart(labels, data, color, unit) {
+  const ctx = document.getElementById('modal-chart').getContext('2d');
+  if (window.modalChart) window.modalChart.destroy();
+  
+  window.modalChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: unit,
+        data: data,
+        borderColor: color,
+        backgroundColor: color + '20',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94A3B8' } },
+        x: { grid: { display: false }, ticks: { color: '#94A3B8' } }
+      }
+    }
+  });
+}
 
 async function loadDashboard() {
   initXP();
@@ -975,6 +1044,74 @@ window.logMedication = async function(id) {
      window.triggerConfetti();
   }
 };
+
+// ─── Modal (Windows) Control ───
+window.openKPIWindow = async function(type) {
+  const modal = document.getElementById('kpi-detail-window');
+  const title = document.getElementById('modal-title');
+  const icon = document.getElementById('modal-icon');
+  const navBtn = document.getElementById('modal-nav-btn');
+  const insights = document.getElementById('modal-insights');
+  if (!modal) return;
+
+  modal.classList.add('active');
+  
+  // Set Modal Content based on type
+  const configs = {
+    activity: { title: 'Steps Trend', icon: '🏃', color: '#00F0FF', unit: 'Steps' },
+    diet: { title: 'Caloric Intake', icon: '🥗', color: '#10B981', unit: 'kcal' },
+    medications: { title: 'Dose Adherence', icon: '💊', color: '#F59E0B', unit: '%' }
+  };
+  
+  const cfg = configs[type] || configs.activity;
+  title.textContent = cfg.title;
+  icon.textContent = cfg.icon;
+  navBtn.onclick = () => { window.closeKPIWindow(); navigate(type); };
+  
+  // Fetch/Mock History Data
+  const data = type === 'activity' ? [5400, 6200, 7800, 4200, 8100, 10200, 9500] : [1800, 2100, 1950, 2400, 2200, 1900, 2050];
+  const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  
+  renderModalChart(labels, data, cfg.color, cfg.unit);
+  
+  // AI Insight
+  insights.innerHTML = `<strong>Pulse AI:</strong> Your ${type} has improved by 12% this week compared to last. Maintaining this trend will directly optimize your primary metabolic recovery markers.`;
+};
+
+window.closeKPIWindow = function() {
+  document.getElementById('kpi-detail-window')?.classList.remove('active');
+};
+
+function renderModalChart(labels, data, color, unit) {
+  const ctx = document.getElementById('modal-chart').getContext('2d');
+  if (window.modalChart) window.modalChart.destroy();
+  
+  window.modalChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: unit,
+        data: data,
+        borderColor: color,
+        backgroundColor: color + '20',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94A3B8', font: { size: 10 } } },
+        x: { grid: { display: false }, ticks: { color: '#94A3B8', font: { size: 10 } } }
+      }
+    }
+  });
+}
 
 // ─── Init ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {

@@ -122,26 +122,21 @@ function drawScoreRing(score) {
 
   // Calculate Gamified Level
   const levelNames = ['Starter', 'Explorer', 'Achiever', 'Pro', 'Health Ninja'];
-  const levelIdx = Math.min(4, Math.floor(score / 20)); // Score 0-100 gives idx 0-4
-  const levelEl = document.getElementById('health-level-val');
+  const scoreLevelIdx = Math.min(4, Math.floor(score / 20)); 
   
-  if (levelEl) {
-    const prevLevel = levelEl.dataset.currentLevel;
-    const newLevel = `Lvl ${levelIdx + 1}: ${levelNames[levelIdx]}`;
-    
-    // Trigger Level Up Popup if level increased on re-render
-    if (prevLevel && prevLevel !== newLevel) {
-      showGamifiedPopup('Level Up!', '+200 XP', '🚀');
-      window.triggerConfetti();
-    }
-    
-    levelEl.textContent = newLevel;
-    levelEl.dataset.currentLevel = newLevel;
-    levelEl.style.color = score >= 75 ? 'var(--primary)' : score >= 50 ? 'var(--amber)' : 'var(--red)';
+  // Update Health Score UI
+  document.getElementById('health-score-val').textContent = score;
+  
+  // Dynamic Insights based on score
+  const insightText = document.getElementById('insight-text');
+  const insightEmoji = document.getElementById('insight-emoji');
+  if (insightText) {
+    if (score >= 80) { insightText.textContent = "Peak performance detected. Keep it up!"; insightEmoji.textContent = "🚀"; }
+    else if (score >= 60) { insightText.textContent = "Good metabolic stability. Try a short walk."; insightEmoji.textContent = "✨"; }
+    else { insightText.textContent = "Recovery needed. Optimize sleep tonight."; insightEmoji.textContent = "🌙"; }
   }
 }
 
-// ─── Dashboard ──────────────────────────────────────────────────
 // ─── Gamification Engine ───
 window.triggerConfetti = function() {
   if (typeof confetti !== 'undefined') {
@@ -155,17 +150,78 @@ window.triggerConfetti = function() {
   }
 };
 
-window.completeQuest = function(checkbox) {
-  const checkboxes = document.querySelectorAll('.quest-item input');
-  let checkedCount = 0;
-  checkboxes.forEach(cb => { if(cb.checked) checkedCount++; });
-  const pct = (checkedCount / checkboxes.length) * 100;
-  document.getElementById('quest-progress-bar').style.width = pct + '%';
-  if (pct === 100) {
-    showGamifiedPopup('All Quests Completed!', '+500 XP', '🏆');
+function initXP() {
+  let xp = parseInt(localStorage.getItem('app_xp') || '0');
+  let level = parseInt(localStorage.getItem('app_level') || '1');
+  updateXPUI(xp, level);
+}
+
+function addXP(amount) {
+  let xp = parseInt(localStorage.getItem('app_xp') || '0');
+  let level = parseInt(localStorage.getItem('app_level') || '1');
+  
+  xp += amount;
+  const xpToNext = level * 1000;
+  
+  if (xp >= xpToNext) {
+    xp -= xpToNext;
+    level++;
+    localStorage.setItem('app_level', level);
+    showGamifiedPopup('LEVEL UP!', `You reached Level ${level}`, '🏆');
     window.triggerConfetti();
   }
+  
+  localStorage.setItem('app_xp', xp);
+  updateXPUI(xp, level);
+}
+
+function updateXPUI(xp, level) {
+  const xpToNext = level * 1000;
+  const pct = (xp / xpToNext) * 100;
+  
+  const fill = document.getElementById('xp-fill');
+  const levelLabel = document.getElementById('user-level');
+  const valLabel = document.getElementById('xp-value');
+  
+  if (fill) fill.style.width = pct + '%';
+  if (levelLabel) levelLabel.textContent = level;
+  if (valLabel) valLabel.textContent = `${xp} / ${xpToNext} XP`;
+}
+
+window.completeQuest = function(checkbox) {
+  if (checkbox.checked) {
+    addXP(150);
+    showGamifiedPopup('Quest Step!', '+150 XP', '⭐');
+    
+    // Check if all quests done
+    const total = document.querySelectorAll('#quest-list input').length;
+    const done = document.querySelectorAll('#quest-list input:checked').length;
+    if (total === done) {
+      addXP(500);
+      showGamifiedPopup('Daily Quests Clear!', '+500 XP', '👑');
+      window.triggerConfetti();
+    }
+  }
 };
+
+// ─── Quick Shortcuts Logic ───
+window.quickLogWater = function() {
+  let waterCount = parseInt(localStorage.getItem('waterCount') || '0');
+  if (waterCount < 8) {
+    waterCount++;
+    localStorage.setItem('waterCount', waterCount);
+    addXP(50);
+    showGamifiedPopup('Hydrated!', '+50 XP Recorded', '💧');
+    if (waterCount === 8) {
+      addXP(200);
+      showGamifiedPopup('Hydration Goal!', '+200 XP Bonus', '🌊');
+      window.triggerConfetti();
+    }
+  } else {
+    showGamifiedPopup('Fully Hydrated!', 'Daily goal met.', '✅');
+  }
+};
+
 
 async function fetchDashboardData() {
   const [summary, tipsData] = await Promise.all([
@@ -190,43 +246,69 @@ setInterval(async () => {
 }, 30000);
 
 async function loadDashboard() {
-  const { summary, tipsData } = await fetchDashboardData();
+  initXP();
+  
+  // Fetch everything in parallel for that "instant" feel
+  const [summary, tipsData, activityData, dietData, medData] = await Promise.all([
+    api('/api/biomarkers/summary'),
+    api('/api/health-ai/tips'),
+    api('/api/activity/summary'),
+    api('/api/diet/comparison?days=1'), // Just today
+    api('/api/medications')
+  ]);
 
   if (summary.success) {
     drawScoreRing(summary.score);
-    const st = summary.stats;
-    document.getElementById('score-stats').innerHTML =
-      `<span class="stat-chip normal">${st.normal} Normal</span>` +
-      `<span class="stat-chip borderline">${st.borderline} Borderline</span>` +
-      `<span class="stat-chip critical">${st.critical} Critical</span>` +
-      (summary.activityModifier ? `<span class="stat-chip ${summary.activityModifier > 0 ? 'normal' : 'critical'}" style="width:100%; justify-content:center; margin-top:8px;">🏃 ${summary.activityModifier > 0 ? '+' : ''}${summary.activityModifier} Activity Impact</span>` : '');
-
     document.getElementById('last-updated').textContent = 'Last: ' + summary.date;
 
     const v = summary.vitals;
     document.getElementById('vitals-grid').innerHTML = [
-      vitalCard('Blood Pressure', v.bp, 'mmHg', v.bpStatus),
+      vitalCard('Pressure', v.bp, 'mmHg', v.bpStatus),
       vitalCard('SpO2', v.spo2, '%', v.spo2Status),
-      vitalCard('Pulse Rate', v.pulse, 'bpm', v.pulseStatus),
-      vitalCard('Temperature', v.temp, '°F', v.tempStatus),
-      vitalCard('BMI', v.bmi, 'kg/m²', v.bmiStatus),
-      vitalCard('Blood Sugar', v.sugar, 'mg/dL', v.sugarStatus),
+      vitalCard('Pulse', v.pulse, 'bpm', v.pulseStatus),
+      vitalCard('BMI', v.bmi, '', v.bmiStatus),
     ].join('');
   }
 
-  // Categories
+  // ─── Activity Pulse Update ───
+  if (activityData.success) {
+    const steps = activityData.kpis.steps;
+    document.getElementById('kpi-steps-val').textContent = steps.toLocaleString();
+    const pct = Math.min((steps / 10000) * 100, 100);
+    document.getElementById('kpi-steps-fill').style.width = pct + '%';
+  }
+
+  // ─── Nutrition Pulse Update ───
+  if (dietData.success) {
+    const today = dietData.comparison[0];
+    if (today) {
+       document.getElementById('kpi-calories-val').textContent = today.actual.calories;
+       const pPct = Math.min((today.actual.protein / (today.target.protein || 50)) * 100, 100);
+       const cPct = Math.min((today.actual.carbs / (today.target.carbs || 250)) * 100, 100);
+       document.getElementById('fuel-protein').style.width = pPct + '%';
+       document.getElementById('fuel-carbs').style.width = cPct + '%';
+    }
+  }
+
+  // ─── Medications Pulse Update ───
+  if (medData.success && medData.data.length > 0) {
+    const next = medData.data.find(m => !m.takenToday);
+    if (next) {
+      document.getElementById('next-med-time').textContent = next.times[0];
+      document.getElementById('next-med-name').textContent = next.name;
+    }
+  }
+
+  // Categories & Tips (Same as before but with entrance animations)
   const catData = await api('/api/biomarkers');
   if (catData.success) {
-    document.getElementById('categories-grid').innerHTML = catData.categories.map(cat => {
-      const markers = cat.biomarkers.map(b =>
-        `<div class="cat-marker-dot ${b.status}"></div>`
-      ).join('');
-      return `<div class="category-card" style="--cat-color:${cat.color}" data-catid="${cat.id}">
+    document.getElementById('categories-grid').innerHTML = catData.categories.map((cat, idx) => {
+      const markers = cat.biomarkers.map(b => `<div class="cat-marker-dot ${b.status}"></div>`).join('');
+      return `<div class="category-card cascade delay-${idx % 5}" style="--cat-color:${cat.color}" data-catid="${cat.id}">
         <div class="cat-header">
           <span class="cat-name">${cat.name}</span>
           <span class="cat-count">${cat.biomarkers.length} tests</span>
         </div>
-        <div class="cat-desc">${cat.description}</div>
         <div class="cat-markers">${markers}</div>
       </div>`;
     }).join('');
@@ -236,13 +318,11 @@ async function loadDashboard() {
     });
   }
 
-  // Tips
   if (tipsData.success) {
-    document.getElementById('tips-grid').innerHTML = tipsData.tips.map(t => `
+    document.getElementById('tips-grid').innerHTML = tipsData.tips.slice(0, 3).map(t => `
       <div class="tip-card ${t.severity}">
         <div class="tip-header">
           <span class="tip-cat">${t.category}</span>
-          <span class="tip-sev ${t.severity}">${t.severity}</span>
         </div>
         <div class="tip-text">${t.tip}</div>
       </div>
@@ -590,7 +670,8 @@ async function loadActivity() {
     });
 
     if (res.success) {
-      document.getElementById('activity-success').textContent = 'Activity Saved!';
+      addXP(200);
+      document.getElementById('activity-success').textContent = 'Activity Saved! +200 XP';
       document.getElementById('activity-success').classList.add('show');
       setTimeout(() => { document.getElementById('activity-success').classList.remove('show'); }, 3000);
       form.reset();
